@@ -329,7 +329,7 @@ if __name__ == "__main__":
             [
                 # one_dict_nb_name,
                 # two_dict_nb_name,
-                # three_dict_nb_name,
+                three_dict_nb_name,
                 four_dict_nb_name,
                 five_dict_nb_name,
             ],
