@@ -13,18 +13,16 @@ from typing import Dict, List
 import pandas as pd
 import papermill as pm
 
-
 PROJ_ROOT_DIR = os.path.abspath(os.getcwd())
 raw_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "raw")
 processed_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "processed")
 output_notebook_dir = os.path.join(PROJ_ROOT_DIR, "executed_notebooks")
-
 one_dict_nb_name = "1_get_list_of_urls.ipynb"
 two_dict_nb_name = "2_scrape_urls.ipynb"
 three_dict_nb_name = "3_merge_scraped_and_filter.ipynb"
 four_dict_nb_name = "4_nlp_trials.ipynb"
 five_dict_nb_name = "5_corex_nlp_trials.ipynb"
-
+cloud_run = True
 raw_data_filepaths = {}
 for fname in ["space", "guardian", "hubble", "nytimes"]:
     full_filename = f"{fname}_com" if fname == "space" else fname
@@ -73,16 +71,18 @@ two_dict = {
     "max_delay_between_scraped": 1,
     "list_of_urls_file": raw_data_filepaths,
 }
-urls = {
-    k: pd.read_csv(two_dict["list_of_urls_file"][k]["url"].tolist())
-    for k in ["guardian", "hubble", "space"]
-}
-urls["nytimes"] = pd.concat(
-    [pd.read_csv(f) for f in glob(raw_data_filepaths["nytimes"])],
-    axis=0,
-    ignore_index=True,
-)["web_url"].tolist()
-two_dict["urls"] = urls
+if not cloud_run:
+    urls = {
+        k: pd.read_csv(two_dict["list_of_urls_file"][k]["url"].tolist())
+        for k in ["guardian", "hubble", "space"]
+    }
+    urls = {}
+    urls["nytimes"] = pd.concat(
+        [pd.read_csv(f) for f in glob(raw_data_filepaths["nytimes"])],
+        axis=0,
+        ignore_index=True,
+    )["web_url"].tolist()
+    two_dict["urls"] = urls
 
 three_dict = {
     "data_dir": raw_data_dir,
@@ -330,7 +330,7 @@ if __name__ == "__main__":
             [
                 # one_dict_nb_name,
                 # two_dict_nb_name,
-                three_dict_nb_name,
+                # three_dict_nb_name,
                 four_dict_nb_name,
                 five_dict_nb_name,
             ],
