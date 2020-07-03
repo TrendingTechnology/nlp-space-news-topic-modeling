@@ -13,6 +13,7 @@ from typing import Dict, List
 import pandas as pd
 import papermill as pm
 
+
 PROJ_ROOT_DIR = os.path.abspath(os.getcwd())
 raw_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "raw")
 processed_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "processed")
