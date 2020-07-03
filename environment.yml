@@ -1,0 +1,38 @@
+name: nlp-space-news-topic-modeling
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - pip
+  - pip:
+    - jupyter
+    - jupyterlab
+    - nb_black
+    - numpy
+    - pandas
+    - scikit-learn
+    - matplotlib
+    - seaborn
+    - altair
+    - uszipcode
+    - tqdm
+    - lxml
+    - fake-useragent
+    - beautifulsoup4
+    - selenium
+    - tables
+    - dask[distributed]
+    - dask[dataframe]
+    - dask[delayed]
+    - dask-ml[complete]
+    - fsspec>=0.3.3
+    - wordninja
+    - pyldavis
+    - spacy
+    - nltk
+    - corextopic
+    - networkx
+    - requests
+    - goose3
+    - newspaper3k
+    - azure-storage-blob
