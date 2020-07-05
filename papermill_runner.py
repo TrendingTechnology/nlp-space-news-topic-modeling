@@ -87,44 +87,39 @@ if not cloud_run:
 three_dict = {
     "data_dir": raw_data_dir,
     "processed_data_dir": processed_data_dir,
-    "hubble_filename": "hubble_urls.csv",
-    "hubble_text": "hubble.csv",
+    "az_storage_container_name": "myconedesx7",
+    "cloud_data": True,
+    "hubble_inputs": {"blobedesz23": "urls", "blobedesz22": "text",},
     "hubble_processed_filename": "hubble_processed.csv",
-    "nytimes_filename": "nytimes_urls__*.csv",
-    "nytimes_text_filenames": [
-        "nytimes.csv",
-        # # use below to scrape only certain articles' text at once
-        # # and then combine all tries together
-        # "nytimes_1.csv",
-        # "nytimes_3.csv",
-        # "nytimes_2.csv",
-    ],
+    "nytimes_inputs": {
+        "blobedesz27": "urls_1950_1989",
+        "blobedesz28": "urls_1990_1999",
+        "blobedesz29": "urls_2000_2019",
+        "blobedesz24": "text1",
+        "blobedesz25": "text2",
+        "blobedesz26": "text3",
+    },
     "nytimes_processed_filename": "nytimes_processed.csv",
-    "space_filename": "space_com_urls.csv",
-    "space_text_filenames": [
-        # # use below to scrape only certain articles' text at once
-        # # and then combine all tries together
-        "space.csv",
-        # "space_1.csv",
-        # "space_2.csv",
-        # "space_3.csv",
-        # "space_4.csv",
-        # "space_5.csv",
-    ],
+    "space_inputs": {
+        "blobedesz35": "urls",
+        "blobedesz30": "text1",
+        "blobedesz31": "text2",
+        "blobedesz32": "text3",
+        "blobedesz33": "text4",
+        "blobedesz34": "text5",
+    },
     "space_processed_filename": "space_processed.csv",
-    "guardian_filename": "guardian_urls.csv",
-    "guardian_text_filenames": [
-        # # use below to scrape only certain articles' text at once
-        # # and then combine all tries together
-        "guardian.csv",
-        # "guardian_1.csv",
-        # "guardian_2.csv"
-    ],
+    "guardian_inputs": {
+        "blobedesz21": "urls",
+        "blobedesz19": "text1",
+        "blobedesz20": "text2",
+    },
     "guardian_processed_filename": "guardian_processed.csv",
 }
 
 four_dict = {
     "publication_name": "guardian",
+    "cloud_run": True,
     "manual_stop_words": ["nt", "ll", "ve"],
     "mapping_dict": {
         "nytimes": {
@@ -173,6 +168,7 @@ four_dict["data_dir_path"] = str(
 
 five_dict = {
     "publication_name": "guardian",
+    "cloud_run": True,
     "manual_stop_words": ["nt", "ll", "ve"],
     "mapping_dict": {
         "nytimes": {

@@ -13,6 +13,7 @@ fake-useragent
 beautifulsoup4
 selenium
 tables
+bokeh
 dask[distributed]
 dask[dataframe]
 dask[delayed]
@@ -23,6 +24,7 @@ pyldavis
 spacy
 nltk
 corextopic
+gensim
 networkx
 requests
 goose3
