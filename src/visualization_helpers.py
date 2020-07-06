@@ -51,15 +51,26 @@ def plot_horiz_bar(
 ):
     """Plot horizontal bar chart, with labeled bar values"""
     # Get top n words per topic
-    df_view_words = [
-        df[col].sort_values(ascending=False).index.tolist()[:n_bars][::-1]
-        for col in df
-    ]
+    df_view_words = []
+    for col in df:
+        if df[col].min() < 0:
+            terms = (
+                df[col]
+                # .abs()
+                .sort_values(ascending=False).index.tolist()[:n_bars]
+            )
+        else:
+            terms = (
+                df[col]
+                .sort_values(ascending=False)
+                .index.tolist()[:n_bars][::-1]
+            )
+        df_view_words.append(terms)
 
     # Get DataFrame corresponding to top n words per topic
     df_view = pd.DataFrame(
         {
-            key: sorted(value.values(), reverse=False)
+            key: sorted(np.abs(list(value.values())), reverse=False)
             for key, value in df.to_dict().items()
         }
     ).tail(n_bars)
