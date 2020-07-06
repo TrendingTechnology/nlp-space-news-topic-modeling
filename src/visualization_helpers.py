@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 
 from pathlib import Path
 
 import altair as alt
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -48,7 +51,7 @@ def plot_horiz_bar(
     n_plots=2,
     n_cols=2,
     show_bar_labels=True,
-):
+) -> plt.figure:
     """Plot horizontal bar chart, with labeled bar values"""
     # Get top n words per topic
     df_view_words = []
@@ -439,3 +442,60 @@ def altair_datetime_heatmap(
     if not file_path.is_file() and save_to_html:
         heatmap.save(str(file_path))
     return heatmap
+
+
+def plot_horiz_bar_gensim(
+    model, id2word_dictionary, mapper_dict, fig_size=(40, 35)
+) -> plt.figure:
+    tableau10_colors = list(mcolors.TABLEAU_COLORS.values())
+    colors = tableau10_colors + tableau10_colors[: len(mapper_dict)]
+    fig = plt.figure(constrained_layout=True, figsize=fig_size)
+    gs = fig.add_gridspec(5, 3)
+    axs = []
+    for rc in range(5):
+        for cc in range(3):
+            axs.append(fig.add_subplot(gs[rc, cc]))
+    for topic_id, ccolor in zip(range(len(mapper_dict)), colors):
+        df_topic_probs_per_topic = pd.DataFrame(
+            model.get_topic_terms(topicid=topic_id, topn=10, normalize=True),
+            columns=["word_id", "probability"],
+        )
+        df_topic_probs_per_topic.insert(
+            0, "topic", mapper_dict[topic_id],
+        )
+        df_topic_probs_per_topic.insert(
+            1,
+            "word",
+            df_topic_probs_per_topic["word_id"].apply(
+                lambda x: id2word_dictionary[x]
+            ),
+        )
+        df_view = df_topic_probs_per_topic.pivot(
+            index="topic", columns="word", values="probability"
+        ).T.sort_values(by=mapper_dict[topic_id], ascending=True,)
+        ax = axs[topic_id]
+        _ = df_view.plot(
+            kind="barh",
+            logx=False,
+            align="center",
+            legend=False,
+            edgecolor="black",
+            width=0.8,
+            title=None,
+            color=ccolor,
+            ax=ax,
+        )
+        ax.set_yticklabels(
+            df_view.index.tolist(), fontsize=SMALL_SIZE, rotation=0, ha="right"
+        )
+        ax.set_ylabel(None)
+        ax.set_xticklabels([])
+        ax.set_title(
+            mapper_dict[topic_id], fontweight="bold", fontsize=BIGGER_SIZE,
+        )
+        ax.spines["right"].set_visible(False)
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.xaxis.set_ticks_position("none")
+        ax.yaxis.set_ticks_position("none")
+    return fig

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 
 def generate_space_archive_url(year, s_archive_base_url):
