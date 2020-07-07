@@ -28,7 +28,7 @@ def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
     respective number of topics
     """
     coherence_values = []
-    model_dict = []
+    model_dict = {}
     for num_topics in range(start, limit + 1, step):
         model = nmf.Nmf(
             corpus=corpus,
@@ -36,7 +36,7 @@ def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
             num_topics=num_topics,
             chunksize=2000,  # no. of docs to be used in each training chunk
             passes=10,
-            # kappa=0.1,
+            kappa=1.0,
             minimum_probability=0.01,
             w_max_iter=200,
             w_stop_condition=0.0001,
@@ -53,7 +53,7 @@ def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
         model_coherence_value = coherence_model.get_coherence()
         print(
             f" > Applied NMF for k={num_topics:0d} and found "
-            f"coherence={model_coherence_value}..."
+            f"coherence={model_coherence_value:.4f}"
         )
         coherence_values.append(model_coherence_value)
 
