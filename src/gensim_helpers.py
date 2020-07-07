@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 
 
+import re
+from typing import Dict
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import spacy
 from gensim.models import CoherenceModel, Phrases, nmf
 from gensim.models.phrases import Phraser
 from gensim.utils import simple_preprocess
+from matplotlib.ticker import MaxNLocator
 
 
 def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
@@ -64,6 +68,7 @@ def plot_coherence_scores(coherence_vals, start, stop, step, fig_size=(8, 4)):
     _, ax = plt.subplots(figsize=fig_size)
     x = range(start, stop + 1, step)
     ax.plot(x, coherence_vals)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     max_coherence = max(coherence_vals)
     max_coherence_num_topics = coherence_vals.index(max_coherence)
     best_k = start + max_coherence_num_topics
@@ -133,10 +138,15 @@ def format_topics_sentences(model, corpus, df_source, topic_mapper_dict):
     return df_with_topics
 
 
-def sent_to_words(sentences):
+def sent_to_words(sentences: list, min_length: int = 2, max_length: int = 15):
     for sentence in sentences:
         yield (
-            simple_preprocess(str(sentence), deacc=True)
+            simple_preprocess(
+                str(sentence),
+                deacc=True,
+                min_len=min_length,
+                max_len=max_length,
+            )
         )  # deacc=True removes punctuations\
 
 
@@ -171,3 +181,19 @@ def lemmatization(texts, allowed_postags=["NOUN", "ADJ", "VERB", "ADV"]):
             [token.lemma_ for token in doc if token.pos_ in allowed_postags]
         )
     return texts_out
+
+
+def print_top_words_gensim(
+    gensim_nmf_model: nmf.Nmf,
+    mapper_dict: Dict,
+    top_n_words: int = 10,
+    random_state: int = 42,
+) -> None:
+    twords = {}
+    print(f"Top terms per topic, using random_state={random_state}:")
+    for topic, word in gensim_nmf_model.show_topics(
+        num_topics=len(mapper_dict), num_words=top_n_words
+    ):
+        words_cleaned = re.sub("[^A-Za-z ]+", "", word)
+        twords[topic] = words_cleaned
+        print(f"Topic {topic}:", words_cleaned.replace("  ", " "))
