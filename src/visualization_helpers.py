@@ -3,6 +3,7 @@
 
 
 from pathlib import Path
+from typing import List
 
 import altair as alt
 import numpy as np
@@ -229,14 +230,8 @@ def manual_get_topics(
     analysis_type="lsa",
     number_of_words_per_topic_to_show=5,
     show_bar_labels=True,
-):
-    """Pipeline-based workflow to get topics"""
-    # X_train, X_test = train_test_split(X, test_size=0.33, random_state=42)
-    # doc_word_train = vectorizer.fit_transform(X_train)
-    # doc_word = vectorizer.transform(X_test)
-    # _ = model.fit_transform(doc_word_train)
-    # doc_topic = model.fit_transform(doc_word)
-
+) -> List:
+    """Manual workflow to get topics"""
     doc_word = vectorizer.fit_transform(X)
     doc_topic = model.fit_transform(doc_word)
 
@@ -321,10 +316,12 @@ def manual_get_topics(
         "all_most_popular_topics"
     ].replace(dict_mapper, regex=True)
 
-    return df_with_topics, df_topics_by_year, fig
+    return [df_with_topics, df_topics_by_year, fig]
 
 
-def get_main_topic_percentage(df, group_by_col, quant_col_idx_start=1):
+def get_main_topic_percentage(
+    df: pd.DataFrame, group_by_col: str, quant_col_idx_start: int = 1
+) -> pd.DataFrame:
     """
     Get a DataFrame of percentage of document belonging to most popular topic
     """
@@ -494,3 +491,52 @@ def plot_horiz_bar_gensim(
         ax.xaxis.set_ticks_position("none")
         ax.yaxis.set_ticks_position("none")
     return fig
+
+
+def get_top_words_per_topic(
+    model_fitted,
+    vectorizer_fitted,
+    mapper_dict: dict,
+    num_top_words: int = 10,
+    num_topics: int = 15,
+    rename_col_names: bool = False,
+) -> List:
+    topic_word_best = pd.DataFrame(
+        model_fitted.components_,
+        index=[f"component_{k+1}" for k in range(num_topics)],
+        columns=vectorizer_fitted.get_feature_names(),
+    )
+    top_words = {}
+    top_vals = {}
+    for topic, words_ in topic_word_best.T.items():
+        top10 = words_.nlargest(num_top_words).index
+        vals = words_.loc[top10].values
+        top_vals[topic] = vals
+        top_words[topic] = top10.tolist()
+    df_top_words_per_topic = pd.DataFrame(top_words)
+    df_top_vals_per_topic = pd.DataFrame(top_vals)
+    if rename_col_names:
+        df_top_words_per_topic = df_top_words_per_topic.rename(
+            columns=mapper_dict
+        )
+        df_top_vals_per_topic = df_top_vals_per_topic.rename(
+            columns=mapper_dict
+        )
+    return [topic_word_best, df_top_words_per_topic, df_top_vals_per_topic]
+
+
+def get_docs_with_topics_v2(
+    corpus: list, model_transformed, mapper_dict: dict, df: pd.DataFrame
+) -> pd.DataFrame:
+    corpus_label = [t[:30] + "..." for t in corpus]
+    df_with_topics = pd.DataFrame(
+        data=model_transformed,
+        columns=mapper_dict.values(),
+        index=corpus_label,
+    )
+    df_with_topics = df_with_topics.div(df_with_topics.sum(axis=1), axis=0)
+    df_with_topics["most_popular_topic"] = df_with_topics.idxmax(axis=1)
+    df_with_topics.insert(0, "text", df["text"].to_numpy())
+    df_with_topics.insert(1, "year", df["year"].to_numpy())
+    df_with_topics.insert(2, "document", range(len(df_with_topics)))
+    return df_with_topics

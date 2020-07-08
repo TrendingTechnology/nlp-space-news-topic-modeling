@@ -14,7 +14,16 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 
-def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
+def compute_coherence_values(
+    corpus,
+    id2word,
+    texts,
+    limit,
+    start=2,
+    step=3,
+    random_state=42,
+    chunk_size=500,
+):
     """
     Compute c_v coherence for various number of topics
 
@@ -34,11 +43,12 @@ def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
     coherence_values = []
     model_dict = {}
     for num_topics in range(start, limit + 1, step):
+        print(f" > Applying NMR for k={num_topics:0d}...", end="")
         model = nmf.Nmf(
             corpus=corpus,
             id2word=id2word,
             num_topics=num_topics,
-            chunksize=2000,  # no. of docs to be used in each training chunk
+            chunksize=chunk_size,  # no. of docs to be used per training chunk
             passes=10,
             kappa=1.0,
             minimum_probability=0.01,
@@ -48,19 +58,16 @@ def compute_coherence_values(corpus, id2word, texts, limit, start=2, step=3):
             h_stop_condition=0.001,
             eval_every=10,
             normalize=True,
-            random_state=42,
+            random_state=random_state,
         )
         model_dict[num_topics] = model
+        print("computing coherence score...", end="")
         coherence_model = CoherenceModel(
             model=model, texts=texts, dictionary=id2word, coherence="c_v"
         )
         model_coherence_value = coherence_model.get_coherence()
-        print(
-            f" > Applied NMF for k={num_topics:0d} and found "
-            f"coherence={model_coherence_value:.4f}"
-        )
+        print(f"found coherence={model_coherence_value:.4f}")
         coherence_values.append(model_coherence_value)
-
     return model_dict, coherence_values
 
 

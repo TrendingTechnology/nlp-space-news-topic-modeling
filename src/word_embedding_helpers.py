@@ -128,6 +128,9 @@ def print_top_words(
             print(f"Topic {topic_index+1:0d}: {str_descriptor}")
         docs_topics = W
     else:
+        # https://scikit-learn.org/stable/auto_examples/applications/
+        # plot_topics_extraction_with_nmf_lda.html#sphx-glr-auto-examples-
+        # applications-plot-topics-extraction-with-nmf-lda-py
         best_model = NMF(
             n_components=num_topics, max_iter=700, random_state=random_state
         ).fit(doc_term_matrix)
@@ -149,7 +152,7 @@ def get_docs_with_topics(
     mapper_dict: Dict,
 ) -> pd.DataFrame:
     Vt = pd.DataFrame(
-        docs_topics.round(5),
+        docs_topics,
         index=None,
         columns=[f"component_{k+1}" for k in range(num_topics)],
     )
