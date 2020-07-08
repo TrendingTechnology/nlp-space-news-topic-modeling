@@ -24,6 +24,7 @@ four_dict_nb_name = "4_nlp_trials.ipynb"
 five_dict_nb_name = "5_corex_nlp_trials.ipynb"
 six_dict_nb_name = "6_gensim_nlp_trials.ipynb"
 seven_dict_nb_name = "7_clustering_trials.ipynb"
+publication_name_for_nbs_six_seven = "guardian"
 cloud_run = True
 raw_data_filepaths = {}
 for fname in ["space", "guardian", "hubble", "nytimes"]:
@@ -254,11 +255,11 @@ five_dict["n_topics_wanted"] = len(
     f"{five_dict['corex_anchors'][five_dict['publication_name']]}"
 )
 
-publication_name = "guardian"
 six_dict = {
-    "publication_name": publication_name,
+    "publication_name": publication_name_for_nbs_six_seven,
     "data_dir_path": os.path.join(
-        processed_data_dir, f"{publication_name}_processed.csv"
+        processed_data_dir,
+        f"{publication_name_for_nbs_six_seven}_processed.csv",
     ),
     "cloud_run": True,
     "manual_stop_words": ["nt", "ll", "ve"],
@@ -308,9 +309,10 @@ six_dict = {
 }
 
 seven_dict = {
-    "publication_name": publication_name,
+    "publication_name": publication_name_for_nbs_six_seven,
     "data_dir_path": os.path.join(
-        processed_data_dir, f"{publication_name}_processed.csv"
+        processed_data_dir,
+        f"{publication_name_for_nbs_six_seven}_processed.csv",
     ),
     "cloud_run": True,
     "manual_stop_words": ["nt", "ll", "ve"],
