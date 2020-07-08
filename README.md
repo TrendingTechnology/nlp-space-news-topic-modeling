@@ -47,7 +47,7 @@ Although these articles were acquired, they were not used in analysis.
    - merge metadata (`1_get_list_of_urls.ipynb`) with scraped article text (`2_scrape_urls.ipynb`)
 
 ## [Analysis](#anlysis)
-Analysis will be performed using an un-supervised learning model. Details are included in the various notebooks in the root directory.
+Analysis will be performed using an un-supervised learning model. Details are included in the various notebooks in the root directory and listed [below](#usage).
 
 ## [Usage](#usage)
 1. Clone this repository
@@ -59,12 +59,18 @@ Analysis will be performed using an un-supervised learning model. Details are in
    $ make build
    ```
 3. Run notebooks in the following order
-   - `4_nlp_trials.ipynb`
+   - `4_nlp_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/4_nlp_trials-20200702-113336.ipynb))
      - uses `scikit-learn`'s implementation of NLP to learn topics
        - deploys stop words from [`scikit-learn`](https://awhan.wordpress.com/2016/06/05/scikit-learn-nlp-list-english-stopwords/), Spacy ([1](https://stackoverflow.com/a/41172279/4057186), [2](https://medium.com/@makcedward/nlp-pipeline-stop-words-part-5-d6770df8a936)) and [NLTK](https://www.geeksforgeeks.org/removing-stop-words-nltk-python/)
        - (optionally) uses [Stemming](http://www.nltk.org/howto/stem.html) and [Lemmatization](https://www.geeksforgeeks.org/python-lemmatization-with-nltk/) from NLTK
-   - `5_corex_nlp_trials.ipynb`
+   - `5_corex_nlp_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/5_corex_nlp_trials-20200702-113336.ipynb))
      - uses achored NLP with [CoreEx](https://github.com/gregversteeg/corex_topic) to learn topics
+   - `6_gensim_nlp_trials` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/6_gensim_nlp_trials-20200702-113336.ipynb))
+     - experiments in selecting number of topics using
+       - coherence score from word embedding model with Gensim and `sklearn` implementation of TFIDF with NMF
+       - coherence score from Gensim implementation of NMF without TFIDF vectorization
+   - `7_clustering_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/7_clustering_trials-20200702-113336.ipynb))
+     - experiments in [KMeans clustering](https://en.wikipedia.org/wiki/K-means_clustering) with and without [LSA]() for controlling dimensionality ([1](https://files.ifi.uzh.ch/stiller/CLOSER%202014/CSEDU/CSEDU/Information%20Technologies%20Supporting%20Learning/Full%20Papers/CSEDU_2014_88_CR.pdf), [2](https://www.quora.com/Can-I-combine-LSI-and-K-means-for-text-document-clustering-Are-there-any-sources-to-learn-about-it))
 
 ## [Project Organization](#project-organization)
 
@@ -82,6 +88,8 @@ Analysis will be performed using an un-supervised learning model. Details are in
     ├── executed-notebooks            <- Notebooks with output.
     │   ├── 4_nlp_trials-YYYYMMDD-HHMMSS.ipynb
     │   ├── 5_corex_nlp_trials-YYYYMMDD-HHMMSS.ipynb
+    │   ├── 6_gensim_nlp_trials-YYYYMMDD-HHMMSS.ipynb
+    │   ├── 7_clustering_trials-YYYYMMDD-HHMMSS.ipynb
     |
     ├── *.ipynb                       <- Jupyter notebooks. Naming convention is a number (for ordering),
     │                                    and a short `-` delimited description
