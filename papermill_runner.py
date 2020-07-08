@@ -22,6 +22,8 @@ two_dict_nb_name = "2_scrape_urls.ipynb"
 three_dict_nb_name = "3_merge_scraped_and_filter.ipynb"
 four_dict_nb_name = "4_nlp_trials.ipynb"
 five_dict_nb_name = "5_corex_nlp_trials.ipynb"
+six_dict_nb_name = "6_gensim_nlp_trials.ipynb"
+seven_dict_nb_name = "7_clustering_trials.ipynb"
 cloud_run = True
 raw_data_filepaths = {}
 for fname in ["space", "guardian", "hubble", "nytimes"]:
@@ -245,14 +247,114 @@ five_dict = {
     "corex_anchor_strength": 4,
     "number_of_words_per_topic_to_show": 10,
 }
-five_dict["data_dir_path"] = str(
-    os.path.join(
-        processed_data_dir, f"{five_dict['publication_name']}_processed.csv"
-    )
+five_dict["data_dir_path"] = os.path.join(
+    processed_data_dir, f"{five_dict['publication_name']}_processed.csv"
 )
 five_dict["n_topics_wanted"] = len(
     f"{five_dict['corex_anchors'][five_dict['publication_name']]}"
 )
+
+publication_name = "guardian"
+six_dict = {
+    "publication_name": publication_name,
+    "data_dir_path": os.path.join(
+        processed_data_dir, f"{publication_name}_processed.csv"
+    ),
+    "cloud_run": True,
+    "manual_stop_words": ["nt", "ll", "ve"],
+    "gensim_tfidf_mapping_dict": {
+        "guardian": {
+            "component_1": "Gravity and Black holes - Hawking",
+            "component_2": "Rocket Launches - Testing",
+            "component_3": "Mars Exploration",
+            "component_4": "Academia",
+            "component_5": "Studying Comets and Meteors",
+            "component_6": "Discover of Sub-Atomic particles",
+            "component_7": "Rocket Launches - Moon Landing",
+            "component_8": "Shuttle Missions and Crashes",
+            "component_9": "Global Warming",
+            "component_10": "ISS - USA and Russian segments",
+            "component_11": "Objects crashing into Earth",
+            "component_12": "Space Funding Bodies",
+            "component_13": "Imaging Stars - Astronomy",
+            "component_14": "Saturn Research",
+            "component_15": "Planetary Research",
+        }
+    },
+    "gensim_non_tfidf_mapping_dict": {
+        "guardian": {
+            0: "Studying Comets and Meteors",
+            1: "Rocket Launches - Testing",
+            2: "Discover of Sub-Atomic particles",
+            3: "Learning and Memory",
+            4: "ISS",
+            5: "Brain Research",
+            6: "Academia",
+            7: "Rocket Launches - Moon Landing",
+            8: "Pseudo space-science and Humanity - Opinion",
+            9: "Imaging Stars - Astronomy",
+            10: "Planetary Research",
+            11: "Global Warming and Climate Science",
+            12: "Dark Matter Theories",
+            13: "Space Funding Bodies",
+            14: "Mars Exploration",
+        }
+    },
+    "limit": 16,
+    "start": 12,
+    "step": 1,
+    "n_top_words": 10,
+    "random_state": 42,
+}
+
+seven_dict = {
+    "publication_name": publication_name,
+    "data_dir_path": os.path.join(
+        processed_data_dir, f"{publication_name}_processed.csv"
+    ),
+    "cloud_run": True,
+    "manual_stop_words": ["nt", "ll", "ve"],
+    "mapping_dict": {
+        "guardian": {
+            0: "Gravity and Black Holes - Hawking",
+            1: "Shuttle Missions and Crashes",
+            2: "Global Warming",
+            3: "Academia 2",
+            4: "Studying Comets and Meteors",
+            5: "Rocket Launches - Testing",
+            6: "Discover of Sub-Atomic particles",
+            7: "Academia 1",
+            8: "Planetary Research",
+            9: "Imaging Stars - Astronomy",
+            10: "Objects crashing into Earth",
+            11: "Rocket Launches - Moon Landing",
+            12: "Sky Watching",
+            13: "ISS - USA and Russian segment",
+            14: "Mars Exploration",
+        }
+    },
+    "mapping_dict_lsa": {
+        "guardian": {
+            0: "Academia 1",
+            1: "Space Funding Bodies",
+            2: "Studying Comets and Meteors",
+            3: "Academia 2",
+            4: "ISS - USA and Russian segment",
+            5: "Shuttle Missions and Crashes",
+            6: "Mars Exploration",
+            7: "Planetary Research",
+            8: "Imaging Stars - Astronomy",
+            9: "Discover of Sub-Atomic particles",
+            10: "Sky Watching",
+            11: "Rocket Launches - Moon Landing",
+            12: "Gravity and Black Holes - Hawking",
+            13: "Rocket Launches - Testing",
+            14: "Objects crashing into Earth",
+        }
+    },
+    "minibatch": False,
+    "kmeans_random_state": 42,
+}
 
 
 def papermill_run_notebook(
@@ -329,8 +431,18 @@ if __name__ == "__main__":
                 # three_dict_nb_name,
                 four_dict_nb_name,
                 five_dict_nb_name,
+                six_dict_nb_name,
+                seven_dict_nb_name,
             ],
-            [one_dict, two_dict, three_dict, four_dict, five_dict],
+            [
+                one_dict,
+                two_dict,
+                three_dict,
+                four_dict,
+                five_dict,
+                six_dict,
+                seven_dict,
+            ],
         )
     ]
     run_notebooks(
