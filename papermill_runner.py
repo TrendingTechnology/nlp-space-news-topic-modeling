@@ -89,7 +89,7 @@ three_dict = {
     "processed_data_dir": processed_data_dir,
     "az_storage_container_name": "myconedesx7",
     "cloud_data": True,
-    "hubble_inputs": {"blobedesz23": "urls", "blobedesz22": "text",},
+    "hubble_inputs": {"blobedesz23": "urls", "blobedesz22": "text"},
     "hubble_processed_filename": "hubble_processed.csv",
     "nytimes_inputs": {
         "blobedesz27": "urls_1950_1989",

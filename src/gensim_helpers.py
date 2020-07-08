@@ -5,12 +5,12 @@
 import re
 from typing import Dict
 
-import matplotlib.pyplot as plt
 import pandas as pd
 import spacy
 from gensim.models import CoherenceModel, Phrases, nmf
 from gensim.models.phrases import Phraser
 from gensim.utils import simple_preprocess
+from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 

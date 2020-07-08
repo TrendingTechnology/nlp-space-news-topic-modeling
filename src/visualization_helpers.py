@@ -5,13 +5,11 @@
 from pathlib import Path
 
 import altair as alt
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
-# from sklearn.model_selection import train_test_split
+from matplotlib import colors as mcolors
+from matplotlib import pyplot as plt
 
 SMALL_SIZE = 26
 MEDIUM_SIZE = 28
@@ -132,9 +130,6 @@ def pipe_get_topics(
     show_bar_labels=True,
 ):
     """Pipeline-based workflow to get topics"""
-    # X_train, X_test = train_test_split(X, test_size=0.33, random_state=42)
-    # _ = pipe.fit_transform(X_train)
-    # doc_topic = pipe.transform(X_test)
     doc_topic = pipe.fit_transform(X)
 
     if analysis_type == "lsa":

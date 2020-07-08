@@ -20,7 +20,7 @@ repos:
       language_version: python3.8
       verbose: true
   - repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21
+    rev: 5.0.4
     hooks:
     - id: isort
       name: Ensure python modules are sorted
@@ -47,6 +47,10 @@ repos:
       language_version: python3.8
       args: ["--markdown-linebreak-ext=md"]
       verbose: true
+      exclude: |
+          (?x)(
+              ^executed_notebooks/
+          )
   - repo: https://github.com/PyCQA/bandit
     rev: 1.6.2
     hooks:

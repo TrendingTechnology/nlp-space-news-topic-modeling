@@ -87,7 +87,8 @@ def compute_coherence_values_manually(
     k_values = []
     coherences = []
     for (k, _, H) in topic_models_fitted:
-        # Get all of the topic descriptors - the term_rankings, based on top 10 terms
+        # Get all of the topic descriptors - the term_rankings, based on
+        # top 10 terms
         term_rankings = []
         for topic_index in range(k):
             term_rankings.append(
@@ -99,7 +100,8 @@ def compute_coherence_values_manually(
             calculate_coherence(word2vec_model_fitted, term_rankings)
         )
         print(
-            f" > Applied NMF for k={k:0d} and found coherence={coherences[-1]:.4f}"
+            f" > Applied NMF for k={k:0d} and found coherence="
+            f"{coherences[-1]:.4f}"
         )
     return coherences
 
@@ -129,13 +131,11 @@ def print_top_words(
         best_model = NMF(
             n_components=num_topics, max_iter=700, random_state=random_state
         ).fit(doc_term_matrix)
+        end_n = -n_top_words - 1
         for topic_idx, topic in enumerate(best_model.components_):
             message = f"Topic {topic_idx:0d}: "
             message += " ".join(
-                [
-                    feature_names[i]
-                    for i in topic.argsort()[: -n_top_words - 1 : -1]
-                ]
+                [feature_names[i] for i in topic.argsort()[:end_n:-1]]
             )
             print(message)
         docs_topics = best_model.transform(doc_term_matrix)
