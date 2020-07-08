@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from pathlib import Path
+import os
 from typing import List
 
 import altair as alt
@@ -375,7 +375,9 @@ def altair_datetime_heatmap(
     y_axis_title_alignment="left",
     fwidth=300,
     fheight=535,
-    file_path=Path().cwd() / "reports" / "figures" / "my_heatmap.html",
+    file_path=os.path.join(
+        os.path.abspath(os.getcwd()), "reports", "figures", "my_heatmap.html"
+    ),
     save_to_html=False,
     sort_y=[],
     sort_x=[],
@@ -431,8 +433,8 @@ def altair_datetime_heatmap(
         .properties(width=fwidth, height=fheight)
     )
     heatmap = alt.layer(hmap, data=df)
-    if not file_path.is_file() and save_to_html:
-        heatmap.save(str(file_path))
+    if not os.path.exists(file_path) and save_to_html:
+        heatmap.save(file_path)
     return heatmap
 
 
