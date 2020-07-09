@@ -58,8 +58,9 @@ def plot_horiz_bar(
         if df[col].min() < 0:
             terms = (
                 df[col]
-                # .abs()
-                .sort_values(ascending=False).index.tolist()[:n_bars]
+                .abs()
+                .sort_values(ascending=False)
+                .index.tolist()[:n_bars][::-1]
             )
         else:
             terms = (
