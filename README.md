@@ -59,6 +59,10 @@ Analysis will be performed using an un-supervised learning model. Details are in
    $ make build
    ```
 3. Run notebooks in the following order
+   - `3_merge_scraped_and_filter.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/3_merge_scraped_and_filter-20200702-113336.ipynb))
+     - merge multiple files of articles text data retrieved from news publications API or archive
+     - filter out articles of less than 500 words
+     - export to `*.csv` file for use in unsupervised machine learning models
    - `4_nlp_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/4_nlp_trials-20200702-113336.ipynb))
      - uses `scikit-learn`'s implementation of NLP to learn topics
        - deploys stop words from [`scikit-learn`](https://awhan.wordpress.com/2016/06/05/scikit-learn-nlp-list-english-stopwords/), Spacy ([1](https://stackoverflow.com/a/41172279/4057186), [2](https://medium.com/@makcedward/nlp-pipeline-stop-words-part-5-d6770df8a936)) and [NLTK](https://www.geeksforgeeks.org/removing-stop-words-nltk-python/)
