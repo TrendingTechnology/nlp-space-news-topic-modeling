@@ -67,7 +67,7 @@ Analysis will be performed using an un-supervised learning model. Details are in
      - uses `scikit-learn`'s implementation of NLP to learn topics
        - deploys stop words from [`scikit-learn`](https://awhan.wordpress.com/2016/06/05/scikit-learn-nlp-list-english-stopwords/), Spacy ([1](https://stackoverflow.com/a/41172279/4057186), [2](https://medium.com/@makcedward/nlp-pipeline-stop-words-part-5-d6770df8a936)) and [NLTK](https://www.geeksforgeeks.org/removing-stop-words-nltk-python/)
        - (optionally) uses [Stemming](http://www.nltk.org/howto/stem.html) and [Lemmatization](https://www.geeksforgeeks.org/python-lemmatization-with-nltk/) from NLTK
-   - `5_corex_nlp_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/5_corex_nlp_trials-20200709-210200.ipynb))
+   - `5_corex_nlp_trials.ipynb` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/5_corex_nlp_trials_20200709_210200.ipynb))
      - uses achored NLP with [CoreEx](https://github.com/gregversteeg/corex_topic) to learn topics
    - `6_gensim_nlp_trials` ([view online](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-tpoic-modeling/executed-notebooks/blob/master/6_gensim_nlp_trials-20200709-171834.ipynb))
      - experiments in selecting number of topics using
@@ -92,7 +92,7 @@ Analysis will be performed using an un-supervised learning model. Details are in
     ├── executed-notebooks            <- Notebooks with output.
     │   ├── 3_merge_scraped_and_filter-20200709-171637.ipynb
     │   ├── 4_nlp_trials-20200709-171724.ipynb
-    │   ├── 5_corex_nlp_trials-20200709-210200.ipynb
+    │   ├── 5_corex_nlp_trials_20200709_210200.ipynb
     │   ├── 6_gensim_nlp_trials-20200709-171834.ipynb
     │   ├── 7_clustering_trials-20200709-172944.ipynb
     |
