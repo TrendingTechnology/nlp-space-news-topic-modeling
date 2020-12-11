@@ -1,6 +1,6 @@
 # [NLP Space News Topic Modeling](#nlp-space-news-topic-modeling)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/nlp-space-news-topic-modeling/master?urlpath=lab) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nlp-space-news-topic-modeling/master/4_nlp_trials.ipynb) [![Azure Notebooks](https://notebooks.azure.com/launch.png)](https://notebooks.azure.com/import/gh/nlp-space-news-topic-modeling) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/) ![CI](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CI/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/nlp-space-news-topic-modeling/master?urlpath=lab) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nlp-space-news-topic-modeling/master/4_nlp_trials.ipynb) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/) ![CI](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CI/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
 
 ## [Table of Contents](#table-of-contents)
 1. [Project Idea](#project-idea)
