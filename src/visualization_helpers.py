@@ -24,6 +24,9 @@ plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize\n",
 plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title\n",
 sns.set_style("darkgrid", {"legend.frameon": False}),
 sns.set_context("talk", font_scale=0.95, rc={"lines.linewidth": 2.5})
+alt.renderers.set_embed_options(
+    padding={"left": 0, "right": 0, "bottom": 0, "top": 0}
+)
 
 
 def combine_string_and_nan_columns(df):
@@ -382,18 +385,21 @@ def altair_datetime_heatmap(
     save_to_html=False,
     sort_y=[],
     sort_x=[],
+    dx=5,
+    offset=10,
+    plot_titleFontSize=16,
 ):
     """Generate a datetime heatmap with Altair"""
     # sorty = sort_y if sort_y else None
     # sortx = sort_x if sort_x else None
 
-    base = alt.Chart()
+    base = alt.Chart(title=ytitle)
     hmap = (
         base.mark_rect(fontSize=title_font_size)
         .encode(
             alt.X(
                 x,
-                title=xtitle,
+                title="",
                 axis=alt.Axis(
                     labelAngle=0,
                     tickOpacity=0,
@@ -405,7 +411,7 @@ def altair_datetime_heatmap(
             ),
             alt.Y(
                 y,
-                title=ytitle,
+                title="",
                 axis=alt.Axis(
                     titleAngle=0,
                     titleAlign=y_axis_title_alignment,
@@ -433,7 +439,16 @@ def altair_datetime_heatmap(
         )
         .properties(width=fwidth, height=fheight)
     )
-    heatmap = alt.layer(hmap, data=df)
+    heatmap = (
+        alt.layer(hmap, data=df)
+        .configure_title(
+            fontSize=plot_titleFontSize,
+            anchor="start",
+            dx=dx,
+            offset=offset,
+        )
+        .configure_axisY(labelLimit=450, labelAlign="right")
+    )
     if not os.path.exists(file_path) and save_to_html:
         heatmap.save(file_path)
     return heatmap
@@ -456,7 +471,9 @@ def plot_horiz_bar_gensim(
             columns=["word_id", "probability"],
         )
         df_topic_probs_per_topic.insert(
-            0, "topic", mapper_dict[topic_id],
+            0,
+            "topic",
+            mapper_dict[topic_id],
         )
         df_topic_probs_per_topic.insert(
             1,
@@ -467,7 +484,10 @@ def plot_horiz_bar_gensim(
         )
         df_view = df_topic_probs_per_topic.pivot(
             index="topic", columns="word", values="probability"
-        ).T.sort_values(by=mapper_dict[topic_id], ascending=True,)
+        ).T.sort_values(
+            by=mapper_dict[topic_id],
+            ascending=True,
+        )
         ax = axs[topic_id]
         _ = df_view.plot(
             kind="barh",
@@ -486,7 +506,9 @@ def plot_horiz_bar_gensim(
         ax.set_ylabel(None)
         ax.set_xticklabels([])
         ax.set_title(
-            mapper_dict[topic_id], fontweight="bold", fontsize=BIGGER_SIZE,
+            mapper_dict[topic_id],
+            fontweight="bold",
+            fontsize=BIGGER_SIZE,
         )
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
@@ -543,3 +565,391 @@ def get_docs_with_topics_v2(
     df_with_topics.insert(1, "year", df["year"].to_numpy())
     df_with_topics.insert(2, "document", range(len(df_with_topics)))
     return df_with_topics
+
+
+def altair_boxplot_sorted(
+    df,
+    xvar="X",
+    yvar="Y",
+    sortvar="median(Z)",
+    ptitle="Title here",
+    labelFontSize=12,
+    titleFontSize=12,
+    plot_titleFontSize=16,
+    dx=30,
+    offset=-5,
+    x_tick_label_angle=-45,
+    horiz_bar_chart=False,
+    axis_range=[0, 1],
+    fig_size=(450, 250),
+):
+    sortvar = yvar if not sortvar else sortvar
+    df2 = pd.DataFrame({col: vals[yvar] for col, vals in df.groupby(xvar)})
+    base = alt.Chart(df, title=ptitle).mark_boxplot(
+        color="#4287f5"
+    )  # #3b5b92 or #4287f5
+    if horiz_bar_chart:
+        # print("Horizontal")
+
+        if "median" in sortvar:
+            boxes_sorted_by_median = (
+                df2.median(axis=0).sort_values(ascending=False).index.tolist()
+            )
+        else:
+            boxes_sorted_by_median = np.sort(df[xvar].unique())[::-1].tolist()
+        chart = base.encode(
+            x=alt.X(
+                f"{sortvar}:Q",
+                title="",
+                scale=alt.Scale(domain=(axis_range[0], axis_range[1])),
+            ),
+            y=alt.Y(f"{xvar}:N", title=xvar, sort=boxes_sorted_by_median),
+        )
+        x_tick_label_angle = 0
+        chart = chart.configure_axisY(
+            labelLimit=450, labelAlign="right", titleAngle=0, titleFontSize=0
+        )
+    else:
+        # print("Vertical")
+        if "median" in sortvar:
+            boxes_sorted_by_median = (
+                df2.median(axis=0).sort_values(ascending=True).index.tolist()
+            )
+        else:
+            boxes_sorted_by_median = df[xvar].unique().tolist()
+        chart = base.encode(
+            x=alt.X(f"{xvar}:N", title="", sort=boxes_sorted_by_median),
+            y=alt.Y(
+                f"{sortvar}:Q",
+                title=xvar,
+                scale=alt.Scale(domain=(axis_range[0], axis_range[1])),
+            ),
+        )
+        chart = chart.configure_axisY(titleFontSize=0, titleAngle=0)
+    chart = (
+        chart.properties(width=fig_size[0], height=fig_size[1])
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+        .configure_axisX(labelAngle=x_tick_label_angle)
+        .configure_title(
+            fontSize=plot_titleFontSize, anchor="start", dx=dx, offset=offset
+        )
+    )
+    return chart
+
+
+def boxplot_sorted(
+    df,
+    by,
+    column,
+    ptitle,
+    ha="left",
+    font_size=12,
+    x_tick_angle=0,
+    sort_by_median=True,
+    vert=True,
+    fig_size=(12, 4),
+):
+    _, ax = plt.subplots(figsize=fig_size)
+    props = dict(boxes="#4287f5", whiskers="k", medians="cyan", caps="k")
+    df2 = pd.DataFrame({col: vals[column] for col, vals in df.groupby(by)})
+    if sort_by_median:
+        meds = df2.median().sort_values(ascending=True)
+        df2[meds.index].boxplot(
+            rot=x_tick_angle,
+            fontsize=font_size,
+            vert=vert,
+            color=props,
+            patch_artist=True,
+            ax=ax,
+        )
+    else:
+        df2.boxplot(
+            rot=x_tick_angle,
+            fontsize=font_size,
+            vert=vert,
+            color=props,
+            patch_artist=True,
+            ax=ax,
+        )
+    if vert:
+        ax.set_xticklabels(ax.get_xticklabels(), ha=ha)
+    ax.set_title(
+        ptitle,
+        fontsize=14,
+        loc="left",
+        fontweight="bold",
+    )
+
+
+def altair_plot_grid_by_column(
+    df,
+    xvar,
+    yvar,
+    col2grid,
+    space_between_plots=5,
+    row_size=3,
+    labelFontSize=14,
+    titleFontSize=14,
+    fig_size=(100, 200),
+):
+    columns = []
+    chunks = (df[col2grid].nunique() - 1) // row_size + 1
+    for i in range(chunks):
+        # print(i * row_size, (i + 1) * row_size)
+        rows = []
+        row_mul_start = i * row_size
+        row_mul_stop = (i + 1) * row_size
+        for y in df[col2grid].unique()[row_mul_start:row_mul_stop]:
+            row_chart = (
+                alt.Chart(df[df[col2grid] == y], title=str(y))
+                .mark_bar()
+                .encode(
+                    x=alt.X(f"{xvar}:Q", title=""),
+                    y=alt.Y(f"{yvar}:N", title="", sort="-x"),
+                    color=alt.Color(
+                        f"{col2grid}:N",
+                        scale=alt.Scale(scheme="tableau20"),
+                        legend=None,
+                    ),
+                )
+                .properties(width=fig_size[0], height=fig_size[1])
+            )
+            rows.append(row_chart)
+        col_chart = alt.vconcat(*rows)  # .resolve_scale(color="independent")
+        columns.append(col_chart)
+    combo = (
+        alt.hconcat(*columns).configure_concat(spacing=space_between_plots)
+        # .resolve_scale(color="independent")
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+    )
+    return combo
+
+
+def altair_plot_line_chart(
+    df,
+    ptitle,
+    labelFontSize=14,
+    titleFontSize=14,
+    marker_size=200,
+    fig_size=(750, 250),
+):
+    chart = (
+        alt.Chart(df, title=ptitle)
+        .mark_line(point=True, strokeWidth=5)
+        .encode(x="num_topics:N", y="coherence:Q")
+        .properties(width=fig_size[0], height=fig_size[1])
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+        .configure_point(size=marker_size)
+    )
+    return chart
+
+
+def plot_single_point_annotated_line_chart(
+    df, ptitle, y_annot, fig_size=(12, 4)
+):
+    _, ax = plt.subplots(figsize=fig_size)
+    df.plot(color="#4287f5", ax=ax)
+    ax.get_legend().remove()
+    ax.set_xlabel(None)
+    ax.annotate(
+        f"{df.idxmax()[0]}={y_annot}",
+        xy=(df.idxmax()[0], y_annot),
+        xytext=(df.idxmax()[0], y_annot),
+        textcoords="offset points",
+        arrowprops=dict(facecolor="black", shrink=0.05),
+        bbox=dict(boxstyle="round,pad=0.3", fc=(0.8, 0.9, 0.9), ec="b", lw=2),
+        fontsize=16,
+    )
+    ax.set_title(
+        ptitle,
+        fontsize=14,
+        loc="left",
+        fontweight="bold",
+    )
+    ax.grid(which="both", axis="both", color="lightgrey")
+
+
+def altair_plot_bar_chart_value_counts(
+    df,
+    ptitle,
+    xvar,
+    yvar,
+    labelFontSize=12,
+    titleFontSize=12,
+    plot_titleFontSize=16,
+    dx=30,
+    offset=-5,
+    x_tick_label_angle=-45,
+    horiz_bar_chart=False,
+    fig_size=(650, 250),
+):
+    chart = (
+        alt.Chart(
+            df,
+            title=ptitle,
+        )
+        .mark_bar()
+        .encode(x=alt.X(f"{xvar}", title=""), y=alt.Y(f"{yvar}", title=""))
+        .configure_mark(color="#4287f5")
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+        .configure_axisX(labelAngle=x_tick_label_angle)
+        .properties(width=fig_size[0], height=fig_size[1])
+        .configure_title(
+            fontSize=plot_titleFontSize,
+            anchor="start",
+            dx=dx,
+            offset=offset,
+        )
+    )
+    if horiz_bar_chart:
+        x_tick_label_angle = 0
+        chart = chart.configure_axisX(labelAngle=0).configure_axisY(
+            labelLimit=450, labelAlign="right"
+        )
+    return chart
+
+
+def altair_plot_horiz_bar_chart(
+    data,
+    ptitle="Most Popular Topic by Year",
+    xvar="url",
+    yvar="year",
+    xtitle="Occurrences",
+    labelFontSize=12,
+    titleFontSize=14,
+    plot_titleFontSize=16,
+    text_var="abc",
+    tooltip=["abc", "xyz"],
+    dx=35,
+    offset=0,
+    fig_size=(600, 450),
+):
+    bars = (
+        alt.Chart(data, title=ptitle)
+        .mark_bar()
+        .encode(
+            x=alt.X(f"{xvar}:Q", title=xtitle),
+            y=alt.Y(f"{yvar}:N", title="", sort="-y"),
+            color=alt.Color(f"{text_var}:N", legend=None),
+            tooltip=tooltip,
+        )
+        .properties(height=fig_size[0], width=fig_size[1])
+        .configure_axis(
+            labelFontSize=labelFontSize,
+            titleFontSize=titleFontSize,
+        )
+        .configure_title(
+            fontSize=plot_titleFontSize, anchor="start", dx=dx, offset=offset
+        )
+    )
+    return bars
+
+
+def altair_plot_histogram_grid_by_column(
+    data,
+    xvar,
+    yvar,
+    col2grid,
+    pairs_of_lists,
+    space_between_plots=5,
+    row_size=3,
+    labelFontSize=14,
+    titleFontSize=14,
+    fig_size=(100, 200),
+):
+    columns = []
+    chunks = (len(pairs_of_lists) - 1) // row_size + 1
+    for i in range(chunks):
+        # print(i * row_size, (i + 1) * row_size)
+        rows = []
+        row_mul_start = i * row_size
+        row_mul_stop = (i + 1) * row_size
+        for y in pairs_of_lists[row_mul_start:row_mul_stop]:
+            # print(i, y)
+            row_chart = (
+                alt.Chart(data[data[col2grid].str.contains("|".join(y))])
+                .mark_bar()
+                .encode(
+                    alt.X(f"{xvar}:Q", title="", bin=alt.Bin(maxbins=20)),
+                    alt.Y(f"{yvar}", title=""),
+                    alt.Color(
+                        f"{col2grid}:N",
+                        legend=None,
+                    ),
+                    tooltip=[col2grid, yvar],
+                )
+                .properties(width=200, height=200)
+            )
+            rows.append(row_chart)
+        column_chart = alt.vconcat(*rows).resolve_scale(color="independent")
+        columns.append(column_chart)
+    combo = (
+        alt.hconcat(*columns).configure_concat(spacing=space_between_plots)
+        # .resolve_scale(color="independent")
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+    )
+    return combo
+
+
+def altair_plot_triangular_heatmap(
+    data,
+    ptitle,
+    xvar,
+    yvar,
+    zvar,
+    xtitle,
+    ytitle,
+    tooltip,
+    axis_tick_font_size=14,
+    axis_title_font_size=16,
+    plot_titleFontSize=12,
+    dx=0,
+    offset=0,
+    show_triangle="upper",
+    fig_size=(600, 600),
+):
+    chart = (
+        alt.Chart(
+            data,
+            title=ptitle,
+        )
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                f"{xvar}:O",
+                title=xtitle,
+                axis=alt.Axis(labelAngle=0),
+            ),
+            y=alt.Y(f"{yvar}:O", title=ytitle),
+            color=alt.Color(
+                f"{zvar}:Q", scale=alt.Scale(scheme="yelloworangered")
+            ),
+            tooltip=tooltip,
+        )
+        .properties(width=fig_size[1], height=fig_size[1])
+        .configure_title(
+            fontSize=plot_titleFontSize,
+            anchor="start",
+            dx=dx,
+            offset=offset,
+        )
+        .configure_axis(
+            labelFontSize=axis_tick_font_size,
+            titleFontSize=axis_title_font_size,
+        )
+    )
+    if show_triangle == "lower":
+        chart = chart.transform_filter(f"datum.{xvar} <= datum.{yvar}")
+    elif show_triangle == "upper":
+        chart = chart.transform_filter(f"datum.{xvar} >= datum.{yvar}")
+    return chart

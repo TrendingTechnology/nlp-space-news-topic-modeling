@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/ambv/black
-    rev: 19.10b0
+    rev: 20.8b1
     hooks:
     - id: black
       name: Ensure black code formatting
@@ -12,7 +12,7 @@ repos:
               __init__.py
           )
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.8.4
     hooks:
     - id: flake8
       name: Ensure flake8 compliance
@@ -20,7 +20,7 @@ repos:
       language_version: python3.8
       verbose: true
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.0.6
+    rev: 5.6.4
     hooks:
     - id: isort
       name: Ensure python modules are sorted
@@ -29,7 +29,7 @@ repos:
       verbose: true
       files: \.(py)$
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: v3.4.0
     hooks:
     - id: end-of-file-fixer
       name: Ensure files end in a newline
@@ -41,7 +41,7 @@ repos:
               \.(ipynb)$
           )
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: v3.4.0
     hooks:
     - id: trailing-whitespace
       name: Ensure trailing whitespace is removed
@@ -53,12 +53,12 @@ repos:
               ^executed_notebooks/
           )
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.6.2
+    rev: 1.7.0
     hooks:
     - id: bandit
       name: Ensure compliance with security checks
       language_version: python3.8
-      args: ["--quiet", "--recursive"]
+      args: ["--quiet", "--recursive", '--skip=B104']
       verbose: true
       files: \.(py)$
       exclude: |

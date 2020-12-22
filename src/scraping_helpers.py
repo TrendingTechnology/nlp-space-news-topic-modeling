@@ -11,8 +11,10 @@ from newspaper import fulltext
 
 def get_guardian_text_from_soup(soup):
     """Get Guardian text from soup object"""
-    mydiv = soup.find("div", {"itemprop": "articleBody"})
+    mydiv = soup.find("div", {"class": "article-body-commercial-selector"})
     # print(mydiv)
+    if not mydiv:
+        mydiv = soup.find("div", {"class": "content__article-body"})
     unwanted_tweets = mydiv.findAll(
         "figure", {"class": "element element-tweet"}
     )

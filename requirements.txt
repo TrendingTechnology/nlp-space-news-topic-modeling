@@ -29,4 +29,7 @@ networkx
 requests
 goose3
 newspaper3k
+fastapi
+uvicorn
+python-multipart
 azure-storage-blob

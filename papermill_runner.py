@@ -22,8 +22,9 @@ two_dict_nb_name = "2_scrape_urls.ipynb"
 three_dict_nb_name = "3_merge_scraped_and_filter.ipynb"
 four_dict_nb_name = "4_nlp_trials.ipynb"
 five_dict_nb_name = "5_corex_nlp_trials.ipynb"
-six_dict_nb_name = "6_gensim_nlp_trials.ipynb"
+six_dict_nb_name = "6_gensim_coherence_nlp_trials.ipynb"
 seven_dict_nb_name = "7_clustering_trials.ipynb"
+eight_dict_nb_name = "8_gensim_coherence_nlp_trials_v2.ipynb"
 publication_name_for_nbs_six_seven = "guardian"
 cloud_run = True
 raw_data_filepaths = {}
@@ -46,12 +47,12 @@ one_dict = {
     "guardian_query": "space",
     "guardian_start_page_num": 1,
     "guardian_num_pages_wanted": 49,
-    "guardian_api": "4e521fbc-7b13-4e08-b9c1-9ab29181bee6",
+    "guardian_api": "<api-key-here>",
     "guardian_query_min_delay": 2,
     "guardian_query_max_delay": 4,
     "hubble_article_fields_available": ["name", "news_id", "url"],
     "space_com_years": list(range(1999, 2019 + 1)),
-    "nytimes_api": "3EGfZWOwdNRGiCaYQbhker5S32sWO2n7",
+    "nytimes_api": "<api-key-here>",
     "nytimes_query": "space",
     "nytimes_begin_date": "19500101",
     "nytimes_end_date": "20191101",
@@ -357,6 +358,33 @@ seven_dict = {
     "minibatch": False,
     "kmeans_random_state": 42,
 }
+eight_dict = dict(
+    cloud_data=True,
+    topic_nums=list(range(10, 45 + 5, 5)),
+    n_top_words=10,
+    unwanted_guardian_cols=[
+        "webTitle",
+        "id",
+        "sectionId",
+        "sectionName",
+        "type",
+        "isHosted",
+        "pillarId",
+        "pillarName",
+        "page",
+        "document_type",
+        "apiUrl",
+        "publication",
+        "year",
+        "month",
+        "day",
+        "dayofweek",
+        "dayofyear",
+        "weekofyear",
+        "quarter",
+    ],
+    run_spacy_medium_model=False,
+)
 
 
 def papermill_run_notebook(
@@ -435,6 +463,7 @@ if __name__ == "__main__":
                 # five_dict_nb_name,
                 six_dict_nb_name,
                 seven_dict_nb_name,
+                eight_dict_nb_name,
             ],
             [
                 # one_dict,
@@ -444,6 +473,7 @@ if __name__ == "__main__":
                 # five_dict,
                 six_dict,
                 seven_dict,
+                eight_dict,
             ],
         )
     ]

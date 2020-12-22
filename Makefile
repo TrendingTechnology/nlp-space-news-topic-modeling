@@ -30,6 +30,16 @@ build:
 	tox -e build
 .PHONY: build
 
+## Run app in container
+app-create:
+	./run_docker.sh "create"
+.PHONY: app-create
+
+## Remove container
+app-delete:
+	./run_docker.sh "delete"
+.PHONY: app-delete
+
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################

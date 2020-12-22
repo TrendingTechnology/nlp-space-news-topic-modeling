@@ -1,0 +1,9 @@
+python-multipart
+fastapi
+uvicorn
+bs4
+lxml
+nltk
+requests
+pandas
+scikit-learn

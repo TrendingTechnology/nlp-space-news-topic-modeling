@@ -110,3 +110,27 @@ Analysis will be performed using an un-supervised learning model. Details are in
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #<a target="_blank" href="https://asciinema.org/a/244658">cookiecutterdatascience</a></small></p>
+
+
+
+
+
+
+
+```
+6.1.13 - 3 - planetary research
+6.1.14 - 7 - spacex
+6.1.15 - 8 - asteroid impact
+6.1.16 - 11 - UK ESA Space program
+6.1.17 - 14 - Eclipse
+6.1.18 - 16 - pluto
+6.1.19 - 18 - MIR
+6.1.20 - 19 - virgin galactic
+6.1.21 - 20 - dark matter
+6.1.22 - 21 - globalwarming
+6.1.23 - 23 - gravitational waves
+6.1.24 - 26 - neutrinos
+6.1.25 - 27 - apollo
+6.1.26 - 30 - aliens
+6.1.27 - 31 - hubble
+```
