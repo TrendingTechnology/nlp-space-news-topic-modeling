@@ -731,21 +731,44 @@ def altair_plot_grid_by_column(
 
 def altair_plot_line_chart(
     df,
+    xvar,
+    yvar,
     ptitle,
-    labelFontSize=14,
+    labelFontSize=12,
     titleFontSize=14,
+    plot_titleFontSize=16,
+    linewidth=3,
+    dx=0,
+    offset=5,
+    x_tick_label_angle=-45,
     marker_size=200,
+    y_axis_range=[0, 1],
     fig_size=(750, 250),
 ):
     chart = (
         alt.Chart(df, title=ptitle)
-        .mark_line(point=True, strokeWidth=5)
-        .encode(x="num_topics:N", y="coherence:Q")
+        .mark_line(point=True, strokeWidth=linewidth)
+        .encode(
+            x=alt.X(f"{xvar}:N", title=""),
+            y=alt.Y(
+                f"{yvar}:Q",
+                title="",
+                scale=alt.Scale(domain=(y_axis_range[0], y_axis_range[1])),
+            ),
+        )
         .properties(width=fig_size[0], height=fig_size[1])
         .configure_axis(
             labelFontSize=labelFontSize, titleFontSize=titleFontSize
         )
+        .configure_axisX(labelAngle=x_tick_label_angle)
         .configure_point(size=marker_size)
+        .configure_mark(color="#4287f5")
+        .configure_title(
+            fontSize=plot_titleFontSize,
+            anchor="start",
+            dx=dx,
+            offset=offset,
+        )
     )
     return chart
 
