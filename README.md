@@ -95,11 +95,11 @@ Analysis will be performed using an un-supervised learning model. Details are in
    ```
 2. Launch API inside container
    ```bash
-   make containre-api-run
+   make container-api-run
    ```
 3. Run unit tests on API
    ```bash
-   make test
+   make api-test
    ```
 
 ## [Project Organization](#project-organization)
