@@ -1,3 +1,9 @@
+pytest
+pytest-emoji
+pytest-html
+pytest-md
+pytest-parallel
+pytest-repeat
 python-multipart
 fastapi
 uvicorn
@@ -7,3 +13,4 @@ nltk
 requests
 pandas
 scikit-learn
+azure-storage-blob

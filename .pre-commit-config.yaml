@@ -16,7 +16,7 @@ repos:
     hooks:
     - id: flake8
       name: Ensure flake8 compliance
-      args: ['--ignore=W605,C901']
+      args: ['--ignore=W605,C901,F401']
       language_version: python3.8
       verbose: true
   - repo: https://github.com/timothycrosley/isort
@@ -58,7 +58,7 @@ repos:
     - id: bandit
       name: Ensure compliance with security checks
       language_version: python3.8
-      args: ["--quiet", "--recursive", '--skip=B104']
+      args: ["--quiet", "--recursive", '--skip=B104,B101']
       verbose: true
       files: \.(py)$
       exclude: |

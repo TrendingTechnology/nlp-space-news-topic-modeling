@@ -5,6 +5,7 @@
 """Space News Article Topic Predictor API."""
 
 
+import os
 from typing import List, Mapping, Union
 
 import pandas as pd
@@ -13,6 +14,8 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
 from pydantic import BaseModel
+
+from scraping_helpers import download_az_file_blobs
 
 description = f"""
 {tp.create_description_header_html()}
@@ -28,11 +31,18 @@ topic_names_filepath = "data/nlp_topic_names.csv"
 urls_to_read = 1
 n_topics_wanted = 35
 n_top_words = 10
-
 test_url = (
     "https://www.theguardian.com/science/2019/dec/09/european-space-"
     "agency-to-launch-clearspace-1-space-debris-collector-in-2025"
 )
+azure_blob_file_dict = {
+    "blobedesz40": topic_names_filepath,
+    "blobedesz41": pipe_filepath,
+}
+
+# Data download from blob storage, if not found locally
+if not os.path.exists(pipe_filepath):
+    download_az_file_blobs(azure_blob_file_dict)
 
 pipe = load(pipe_filepath)
 df_named_topics = pd.read_csv(topic_names_filepath, index_col="topic_num")
@@ -70,24 +80,32 @@ async def predict_from_url(
 
     Example Inputs
     --------------
-    - [
-          {"url": "https://www.google.com"},
-          {"url": "https://www.yahoo.com"}
-      ]
-    - [
-          {"url": "https://www.google.com"}
-      ]
+    ```
+    [
+        {"url": "https://www.google.com"},
+        {"url": "https://www.yahoo.com"}
+    ]
+    ```
+
+    ```
+    [
+        {"url": "https://www.google.com"}
+    ]
+    ```
 
     Returns
     -------
     news article topic and text : Dict[str: str]
-    - predicted topic and article text, eg. {
+    - predicted topic and article text, eg.
+      ```
+      {
           "url": "https://www.google.com",
           "text": "abcd"
           "topic_num": "32",
           "topic": 32,
           "best": "Topic Name Here"
       }
+      ```
     """
     guardian_urls = [dict(url)["url"] for url in urls]
     df_new = tp.scrape_new_articles(guardian_urls)
@@ -115,22 +133,29 @@ async def predict_from_file(
 
     Example Inputs
     --------------
+    ```
     url,text
     https://www.google.com,abcd
     https://www.yahoo.com,efgh
+    ```
 
+    ```
     url,text
     https://www.google.com,abcd
+    ```
 
     Returns
     -------
     news article topic and text : Dict[str: str]
-    - predicted topic and article text, eg. {
+    - predicted topic and article text, eg.
+      ```
+      {
           "text": "abcd"
           "topic_num": "32",
           "topic": 32,
           "best": "Topic Name Here"
       }
+      ```
     """
     df_new = pd.read_csv(data_filepath.file)
     # print(df_new)

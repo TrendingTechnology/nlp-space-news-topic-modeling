@@ -2,7 +2,10 @@
 # GLOBALS                                                                       #
 #################################################################################
 
-
+IMAGE_NAME=python:3.8.6-slim-buster
+TAG=edesz/fast-api-demo
+NAME=mycontainer
+PORT_MAP=8000:80
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -30,15 +33,38 @@ build:
 	tox -e build
 .PHONY: build
 
-## Run app in container
-app-create:
-	./run_docker.sh "create"
-.PHONY: app-create
+## Run API with tox
+api:
+	tox -e api
+.PHONY: api
 
-## Remove container
-app-delete:
-	./run_docker.sh "delete"
-.PHONY: app-delete
+## Run api in container
+container-api-run:
+	docker build -t $(TAG) .
+	docker run -d --name $(NAME) -p $(PORT_MAP) $(TAG)
+.PHONY: container-api-run
+
+## Show streaming api container logs
+container-api-logs:
+	docker ps -q | xargs -L 1 docker logs -f
+.PHONY: container-api-logs
+
+## Stop api container
+container-api-stop:
+	docker container stop $(NAME)
+.PHONY: container-api-stop
+
+## Remove api container
+container-api-delete:
+	docker container rm $(NAME)
+	docker rmi $(IMAGE_NAME)
+	docker rmi $(TAG)
+.PHONY: container-api-delete
+
+## Run API tests with tox
+api-test:
+	tox -e test -- -m "not scrapingtest"
+.PHONY: api-test
 
 #################################################################################
 # PROJECT RULES                                                                 #

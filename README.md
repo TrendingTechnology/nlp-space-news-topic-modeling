@@ -81,6 +81,26 @@ Analysis will be performed using an un-supervised learning model. Details are in
        - `sklearn`'s implementation of TFIDF + NMF, using best number of topics found using Gensim's NMF
      - manually reading articles that NMF associates with each topic
      - qualitative assessment of cosine similarities for inter-topic news articles
+4. Run CI build with
+   ```bash
+   make build
+   ```
+
+   which will run notebooks `3_merge_scraped_and_filter.ipynb`, `4_nlp_trials.ipynb`, `6_gensim_coherence_nlp_trials.ipynb`, `7_clustering_trials.ipynb` and `8_gensim_coherence_nlp_trials_v2.ipynb`.
+
+## [API usage](#api-usage)
+1. Launch API
+   ```bash
+   make api
+   ```
+2. Launch API inside container
+   ```bash
+   make containre-api-run
+   ```
+3. Run unit tests on API
+   ```bash
+   make test
+   ```
 
 ## [Project Organization](#project-organization)
 
