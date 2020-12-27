@@ -39,7 +39,7 @@ def test_predictor_multi_input_predict_from_url():
     records = response.json()
     assert len(records) == 1
 
-    assert records[0]["best"] == "Space Debris from Satellites"
+    assert records[0]["best"] == "Scientific Research about Dark Matter"
 
 
 def test_predictor_multi_input_predict_from_file(
@@ -56,9 +56,9 @@ def test_predictor_multi_input_predict_from_file(
     records = response.json()
     assert len(records) == 5
 
-    for record in records[:3]:
-        assert record["best"] == "Space Debris from Satellites"
-    assert records[3]["best"] == (
-        "Sun's influence on life across the Solar System"
-    )
-    assert records[4]["best"] == "ISS updates"
+    assert records[0]["best"] == "Scientific Research about Dark Matter"
+    second_unseen_topic = "Sun's influence on life across the Solar System"
+    assert records[1]["best"] == second_unseen_topic
+    assert records[2]["best"] == "Search for E.T. life"
+    assert records[3]["best"] == "Space Debris from Satellites"
+    assert records[4]["best"] == "Black Holes"

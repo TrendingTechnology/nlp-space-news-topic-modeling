@@ -1,5 +1,7 @@
 # [NLP Space News Topic Modeling](#nlp-space-news-topic-modeling)
 
+<img src="https://www.nasa.gov/sites/default/files/thumbnails/image/nh-pluto-charon-v2-10-1-15.jpg" width="150" height="150" style="margin-right: 10px;"/><img src="https://www.nasa.gov/sites/default/files/thumbnails/image/pia02406.jpg" width="300" height="150" style="margin-right: 10px;"/><img src="https://www.nasa.gov/sites/default/files/thumbnails/image/iss056e201248.jpg" width="225" height="150" style="margin-right: 10px;"/><img src="https://www.nasa.gov/sites/default/files/thumbnails/image/tess_tde_still_print_0.jpg" width="300" height="150" style="margin-right: 10px;"/><img src="https://www.extremetech.com/wp-content/uploads/2015/01/Beagle2-Artist-348x196.jpg" width="150" height="150" style="margin-right: 10px;"/><img src="https://science.nasa.gov/science-red/s3fs-public/mnt/medialibrary/2008/10/10/10oct_lhc_resources/tunnel_med.jpg" width="225" height="150" style="margin-right: 10px;"/>
+
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/nlp-space-news-topic-modeling/master?urlpath=lab) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nlp-space-news-topic-modeling/master/4_nlp_trials.ipynb) [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-topic-modeling/tree/master/) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/) ![CI](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CI/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
 
 ## [Table of Contents](#table-of-contents)
@@ -112,6 +114,18 @@ Analysis will be performed using an un-supervised learning model. Details are in
     ├── environment.yml               <- configuration file to create environment to run project on Binder
     ├── Makefile                      <- Makefile with commands like `make lint` or `make build`
     ├── README.md                     <- The top-level README for developers using this project.
+    ├── app
+    │   ├── data                      <- data exported from training topic modeler, for use with API
+    |   └── tests                     <- Source code for use in API tests
+    |       ├── test-logs             <- Reports from running unit tests on API
+    |       └── testing_utils         <- Source code for use in unit tests
+    |           └── *.py              <- Scripts to use in testing API routes
+    |       ├── __init__.py           <- Allows Python modules to be imported from testing_utils
+    |       └── test_api.py           <- Unit tests for API
+    ├── api.py                        <- Defines API routes
+    ├── pytest.ini                    <- Test configuration
+    ├── requirements.txt              <- Packages required to run and test API
+    ├── s*,t*.py                      <- Scripts to use in defining API routes
     ├── data
     │   ├── raw                       <- raw data retrieved from news publication
     |   └── processed                 <- merged and filtered data

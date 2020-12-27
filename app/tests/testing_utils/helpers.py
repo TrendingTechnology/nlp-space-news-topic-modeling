@@ -11,7 +11,7 @@ from azure.storage.blob import BlobServiceClient
 
 def load_az_blob_data(
     az_storage_container_name="myconedesx7",
-    az_blob_name="blobedesz39",
+    az_blob_name="blobedesz42",
     n_rows=None,
     index_col=None,
 ):

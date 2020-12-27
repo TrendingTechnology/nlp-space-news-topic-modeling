@@ -13,6 +13,7 @@ import topic_predictor as tp
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
+from loading_helpers import handle_upload_file
 from pydantic import BaseModel
 
 from scraping_helpers import download_az_file_blobs
@@ -157,7 +158,9 @@ async def predict_from_file(
       }
       ```
     """
-    df_new = pd.read_csv(data_filepath.file)
+    # print(data_filepath.file)
+    # df_new = pd.read_csv(Path("data") / Path(data_filepath.filename))
+    df_new = handle_upload_file(data_filepath, pd.read_csv)
     # print(df_new)
     df_predicted_new_topics = tp.make_predictions(
         df_new, pipe, n_top_words, n_topics_wanted, df_named_topics
@@ -165,3 +168,4 @@ async def predict_from_file(
     # for k, row in df_predicted_new_topics.iterrows():
     #     print(f"Row={k}, URL={row['url']}, Topic={row['best']}\n")
     return df_predicted_new_topics.to_dict("records")
+    # return {"preds": 1}

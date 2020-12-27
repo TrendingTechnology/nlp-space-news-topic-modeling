@@ -1,0 +1,197 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext lab_black\n",
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os\n",
+    "from time import time\n",
+    "from urllib3.util.retry import Retry\n",
+    "\n",
+    "import pandas as pd\n",
+    "import requests\n",
+    "from bs4 import BeautifulSoup\n",
+    "from requests.adapters import HTTPAdapter"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%aimport src.scraping_helpers\n",
+    "from src.scraping_helpers import get_guardian_text_from_soup"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "tags": [
+     "parameters"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "base_url = \"https://content.guardianapis.com/search\"\n",
+    "path_to_save_unseen_data = \"data/guardian_3.csv\"\n",
+    "guardian_from_date = \"2019-11-02\"\n",
+    "guardian_to_date = \"2020-02-28\"\n",
+    "guardian_section = \"science\"\n",
+    "guardian_query = \"space\"\n",
+    "# guardian_api = os.get_env(\"GUARDIAN_API_KEY\")\n",
+    "guardian_api = \"4e521fbc-7b13-4e08-b9c1-9ab29181bee6\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def get_unseen_links(query_params, base_url):\n",
+    "    r = requests.get(base_url, params=query_params)\n",
+    "    # print(r.json().keys())\n",
+    "    rdocs = r.json()[\"response\"][\"results\"]\n",
+    "    print(f\"Found: {len(rdocs)} articles\")\n",
+    "    d = {}\n",
+    "    for key in [\n",
+    "        \"webUrl\",\n",
+    "        \"id\",\n",
+    "        \"webPublicationDate\",\n",
+    "        \"apiUrl\",\n",
+    "        \"type\",\n",
+    "    ]:\n",
+    "        d[key] = []\n",
+    "        for rr in rdocs:\n",
+    "            try:\n",
+    "                rr[key]\n",
+    "                d[key].append(rr[key])\n",
+    "            except Exception as e:\n",
+    "                d[key].append(None)\n",
+    "    df_guardian_article = pd.DataFrame.from_dict(d, orient=\"index\").T\n",
+    "    df_guardian_article = df_guardian_article.loc[\n",
+    "        (df_guardian_article[\"type\"] == \"article\")\n",
+    "        & (~df_guardian_article[\"webUrl\"].str.contains(\"blog\"))\n",
+    "    ]\n",
+    "    display(df_guardian_article)\n",
+    "    return df_guardian_article\n",
+    "\n",
+    "def get_article_text(df):\n",
+    "    l_texts = {}\n",
+    "    for k, link in enumerate(df[\"webUrl\"].tolist()):\n",
+    "        print(f\"Scraping article number {k+1}, Link: {link}\")\n",
+    "        # print(site, link)\n",
+    "        start_time = time()\n",
+    "        r_session = requests.Session()\n",
+    "        retries = Retry(\n",
+    "            total=2,\n",
+    "            backoff_factor=0.1,\n",
+    "            status_forcelist=[500, 502, 503, 504],\n",
+    "        )\n",
+    "        r_session.mount(\"http://\", HTTPAdapter(max_retries=retries))\n",
+    "        try:\n",
+    "            page_response = r_session.get(link, timeout=5)\n",
+    "        except Exception as ex:\n",
+    "            print(f\"{ex} Error connecting to {link}\")\n",
+    "        else:\n",
+    "            try:\n",
+    "                soup = BeautifulSoup(page_response.content, \"lxml\")\n",
+    "                # print(soup.prettify())\n",
+    "            except Exception as e:\n",
+    "                print(f\"Experienced error {str(e)} when scraping {link}\")\n",
+    "                text = np.nan\n",
+    "            else:\n",
+    "                text = get_guardian_text_from_soup(soup)\n",
+    "        scrape_minutes, scrape_seconds = divmod(time() - start_time, 60)\n",
+    "        print(\n",
+    "            f\"Scraping time: {int(scrape_minutes):d} minutes, {scrape_seconds:.2f} seconds\"\n",
+    "        )\n",
+    "        l_texts[link] = [text]\n",
+    "    df = pd.DataFrame.from_dict(l_texts, orient=\"index\").reset_index()\n",
+    "    df.rename(columns={\"index\": \"url\", 0: \"text\"}, inplace=True)\n",
+    "    display(df)\n",
+    "    return df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "query_params = {\n",
+    "    \"section\": guardian_section,\n",
+    "    \"from-date\": guardian_from_date,\n",
+    "    \"to-date\": guardian_to_date,\n",
+    "    \"order-by\": \"oldest\",\n",
+    "    \"page-size\": 100,\n",
+    "    \"q\": guardian_query,\n",
+    "    \"api-key\": guardian_api,\n",
+    "    \"page\": 1,\n",
+    "}\n",
+    "df_guardian_article = get_unseen_links(query_params, base_url)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = get_article_text(df_guardian_article.drop_duplicates())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We'll now save the retrieved article text data to a csv file"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.to_csv(path_to_save_unseen_data, index=False)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

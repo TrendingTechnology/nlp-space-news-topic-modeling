@@ -400,6 +400,7 @@ def altair_datetime_heatmap(
             alt.X(
                 x,
                 title="",
+                sort=sort_x,
                 axis=alt.Axis(
                     labelAngle=0,
                     tickOpacity=0,
@@ -412,6 +413,7 @@ def altair_datetime_heatmap(
             alt.Y(
                 y,
                 title="",
+                sort=sort_y,
                 axis=alt.Axis(
                     titleAngle=0,
                     titleAlign=y_axis_title_alignment,
@@ -810,6 +812,7 @@ def altair_plot_bar_chart_value_counts(
     offset=-5,
     x_tick_label_angle=-45,
     horiz_bar_chart=False,
+    horiz_label_limit=180,
     fig_size=(650, 250),
 ):
     chart = (
@@ -835,7 +838,7 @@ def altair_plot_bar_chart_value_counts(
     if horiz_bar_chart:
         x_tick_label_angle = 0
         chart = chart.configure_axisX(labelAngle=0).configure_axisY(
-            labelLimit=450, labelAlign="right"
+            labelLimit=horiz_label_limit, labelAlign="right"
         )
     return chart
 
@@ -853,6 +856,8 @@ def altair_plot_horiz_bar_chart(
     tooltip=["abc", "xyz"],
     dx=35,
     offset=0,
+    horiz_label_limit=0,
+    sort_y="-y",
     fig_size=(600, 450),
 ):
     bars = (
@@ -860,7 +865,7 @@ def altair_plot_horiz_bar_chart(
         .mark_bar()
         .encode(
             x=alt.X(f"{xvar}:Q", title=xtitle),
-            y=alt.Y(f"{yvar}:N", title="", sort="-y"),
+            y=alt.Y(f"{yvar}:N", title="", sort=sort_y),
             color=alt.Color(f"{text_var}:N", legend=None),
             tooltip=tooltip,
         )
@@ -873,6 +878,10 @@ def altair_plot_horiz_bar_chart(
             fontSize=plot_titleFontSize, anchor="start", dx=dx, offset=offset
         )
     )
+    if horiz_label_limit > 0:
+        bars = bars.configure_axisY(
+            labelLimit=horiz_label_limit, labelAlign="right"
+        )
     return bars
 
 
