@@ -1,0 +1,11 @@
+{%- for outer_row in image_list %}
+<div class="row">
+    <div class="column">
+        {%- for row in outer_row %}
+        <a href="{{ row['url'] }}">
+        <img src="{{ row['url'] }}" width="{{ row['w'] }}" height="{{ row['h'] }}">
+        </a>
+        {%- endfor %}
+    </div>
+</div>
+{% endfor -%}

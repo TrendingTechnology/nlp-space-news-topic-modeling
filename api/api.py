@@ -6,29 +6,24 @@
 
 
 import os
-from typing import List, Mapping, Union
+from typing import Any, List, Mapping
 
+import api_helpers.api_scraping_helpers as apih
+import api_helpers.api_topic_predictor as tp
+import api_helpers.api_utility_helpers as lh
 import pandas as pd
-import topic_predictor as tp
+from api_helpers.api_loading_helpers import handle_upload_file
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
-from loading_helpers import handle_upload_file
 from pydantic import BaseModel
 
-from scraping_helpers import download_az_file_blobs
+PROJ_ROOT_DIR = os.getcwd()
+jinja2_templates_dir = os.path.join(PROJ_ROOT_DIR, "templates")
 
-description = f"""
-{tp.create_description_header_html()}
-
-{tp.create_header_image_html()[0]}
-
-{tp.create_header_image_html()[1]}
-
-{tp.create_acceptable_urls_markdown()}
-"""
 pipe_filepath = "data/nlp_pipe.joblib"
 topic_names_filepath = "data/nlp_topic_names.csv"
+topic_residuals_filepath = "data/nlp_topic_residuals.csv"
 urls_to_read = 1
 n_topics_wanted = 35
 n_top_words = 10
@@ -39,14 +34,32 @@ test_url = (
 azure_blob_file_dict = {
     "blobedesz40": topic_names_filepath,
     "blobedesz41": pipe_filepath,
+    "blobedesz43": topic_residuals_filepath,
 }
+unseen_urls_filepath = os.path.join(
+    PROJ_ROOT_DIR, "api_helpers", "api_unseen_article_urls.yml"
+)
+api_image_specs_filepath = os.path.join(
+    PROJ_ROOT_DIR, "api_helpers", "api_image_specs.yml"
+)
 
 # Data download from blob storage, if not found locally
 if not os.path.exists(pipe_filepath):
-    download_az_file_blobs(azure_blob_file_dict)
+    apih.download_az_file_blobs(azure_blob_file_dict)
 
 pipe = load(pipe_filepath)
 df_named_topics = pd.read_csv(topic_names_filepath, index_col="topic_num")
+df_residuals_new = pd.read_csv(
+    topic_residuals_filepath, parse_dates=["start_date", "end_date"]
+)
+description = lh.get_description_html(
+    jinja2_templates_dir,
+    "linked_image_grid.j2",
+    unseen_urls_filepath,
+    api_image_specs_filepath,
+    6,
+)
+# print(description)
 
 
 class Url(BaseModel):
@@ -71,7 +84,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 @app.post("/predict")
 async def predict_from_url(
     urls: Urls,
-) -> Mapping[str, Union[str, int]]:
+) -> Mapping[str, Any]:
     """Predict topic from url(s).
 
     Parameters
@@ -96,7 +109,7 @@ async def predict_from_url(
 
     Returns
     -------
-    news article topic and text : Dict[str: str]
+    news article topic, text and other predicted/metadata : Dict[str: str]
     - predicted topic and article text, eg.
       ```
       {
@@ -109,20 +122,22 @@ async def predict_from_url(
       ```
     """
     guardian_urls = [dict(url)["url"] for url in urls]
-    df_new = tp.scrape_new_articles(guardian_urls)
-    # print(df_new)
-    df_predicted_new_topics = tp.make_predictions(
-        df_new, pipe, n_top_words, n_topics_wanted, df_named_topics
+    df_new = apih.scrape_new_articles(guardian_urls)
+    response_dict = tp.generate_response(
+        df_new,
+        pipe,
+        n_top_words,
+        n_topics_wanted,
+        df_named_topics,
+        df_residuals_new,
     )
-    # for k, row in df_predicted_new_topics.iterrows():
-    #     print(f"Row={k}, URL={row['url']}, Topic={row['best']}\n")
-    return df_predicted_new_topics.to_dict("records")
+    return response_dict
 
 
 @app.post("/uploadcsv")
 async def predict_from_file(
     data_filepath: UploadFile = File(...),
-) -> Mapping[str, Mapping[str, float]]:
+) -> Mapping[str, Any]:
     """Predict topic from a CSV file of news article url & text.
 
     Parameters
@@ -147,7 +162,7 @@ async def predict_from_file(
 
     Returns
     -------
-    news article topic and text : Dict[str: str]
+    news article topic, text and other predicted/metadata : Dict[str: str]
     - predicted topic and article text, eg.
       ```
       {
@@ -161,11 +176,12 @@ async def predict_from_file(
     # print(data_filepath.file)
     # df_new = pd.read_csv(Path("data") / Path(data_filepath.filename))
     df_new = handle_upload_file(data_filepath, pd.read_csv)
-    # print(df_new)
-    df_predicted_new_topics = tp.make_predictions(
-        df_new, pipe, n_top_words, n_topics_wanted, df_named_topics
+    response_dict = tp.generate_response(
+        df_new,
+        pipe,
+        n_top_words,
+        n_topics_wanted,
+        df_named_topics,
+        df_residuals_new,
     )
-    # for k, row in df_predicted_new_topics.iterrows():
-    #     print(f"Row={k}, URL={row['url']}, Topic={row['best']}\n")
-    return df_predicted_new_topics.to_dict("records")
-    # return {"preds": 1}
+    return response_dict

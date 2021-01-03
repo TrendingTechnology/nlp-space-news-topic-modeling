@@ -1,0 +1,49 @@
+---
+redspotx:
+  url: https://voyager.jpl.nasa.gov/assets/images/galleries/images-voyager-took/jupiter/redspotx.gif
+  width: 150
+  height: 150
+pia14943:
+  url: https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/pia14943-full.jpg
+  width: 280
+  height: 150
+msl:
+  url: https://mars.nasa.gov/system/resources/detail_files/7438_mars-curiosity-rover-msl-horizon-sky-self-portrait-PIA19808-full_1200.jpg
+  width: 202
+  height: 150
+sts:
+  url: https://www.nasa.gov/sites/default/files/thumbnails/image/sts088-702-024.jpg
+  width: 135
+  height: 150
+ys_full:
+  url: https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/images/182627main_image_feature_872_ys_full.jpg
+  width: 150
+  height: 150
+titan:
+  url: https://solarsystem.nasa.gov/system/resources/detail_files/17846_PIA21923_CassiniVIMSTitan_MAIN-1200w.jpg
+  width: 210
+  height: 150
+potw2001a:
+  url: https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/potw2001a.jpg
+  width: 175
+  height: 150
+pia18891:
+  url: https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA18891_hires.jpg
+  width: 225
+  height: 150
+oct_1_2015_flare:
+  url: https://www.nasa.gov/sites/default/files/thumbnails/image/oct_1_2015_flare.jpg
+  width: 150
+  height: 150
+cometp:
+  url: https://history.nasa.gov/SP-4225/imagery/photos/sts-74/74p-031.jpg
+  width: 180
+  height: 150
+bennu:
+  url: https://solarsystem.nasa.gov/system/resources/detail_files/2224_bennu_dec10.jpg
+  width: 150
+  height: 150
+pia21439:
+  url: https://www.nasa.gov/sites/default/files/styles/full_width_feature/public/thumbnails/image/pia21439.jpg
+  width: 320
+  height: 150

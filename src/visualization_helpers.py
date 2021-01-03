@@ -864,7 +864,7 @@ def altair_plot_horiz_bar_chart(
         alt.Chart(data, title=ptitle)
         .mark_bar()
         .encode(
-            x=alt.X(f"{xvar}:Q", title=xtitle),
+            x=alt.X(f"{xvar}:Q", title=xtitle, axis=alt.Axis(tickMinStep=1)),
             y=alt.Y(f"{yvar}:N", title="", sort=sort_y),
             color=alt.Color(f"{text_var}:N", legend=None),
             tooltip=tooltip,

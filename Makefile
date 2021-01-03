@@ -2,10 +2,14 @@
 # GLOBALS                                                                       #
 #################################################################################
 
+# api/ uses DOCKERFILE_NAME=Dockerfile with APP_PORT=8050
+# app/ uses DOCKERFILE_NAME=Dockerfile_app with APP_PORT=5006
+DOCKERFILE_NAME=Dockerfile_app
+APP_PORT=5006
 IMAGE_NAME=python:3.8.6-slim-buster
-TAG=edesz/fast-api-demo
+TAG=edesz/my-containerized-app
 NAME=mycontainer
-PORT_MAP=8000:80
+PORT_MAP=8000:$(APP_PORT)
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -38,33 +42,47 @@ api:
 	tox -e api
 .PHONY: api
 
-## Run api in container
-container-api-run:
-	docker build -t $(TAG) .
-	docker run -d --name $(NAME) -p $(PORT_MAP) $(TAG)
-.PHONY: container-api-run
+## Build container
+container-build:
+	@docker build -t $(TAG) \
+	    --build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
+		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
+		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
+		--build-arg PORT_ARG=$(APP_PORT) \
+		-f $(DOCKERFILE_NAME) .
+.PHONY: container-build
 
-## Show streaming api container logs
-container-api-logs:
-	docker ps -q | xargs -L 1 docker logs -f
-.PHONY: container-api-logs
+## Run in container
+container-run:
+	@docker run -d -p $(PORT_MAP) --name $(NAME) $(TAG)
+.PHONY: container-run
 
-## Stop api container
-container-api-stop:
-	docker container stop $(NAME)
-.PHONY: container-api-stop
+## Show streaming container logs
+container-logs:
+	@docker ps -q | xargs -L 1 docker logs -f
+.PHONY: container-logs
 
-## Remove api container
-container-api-delete:
-	docker container rm $(NAME)
-	docker rmi $(IMAGE_NAME)
-	docker rmi $(TAG)
-.PHONY: container-api-delete
+## Stop container
+container-stop:
+	@docker container stop $(NAME)
+.PHONY: container-stop
+
+## Remove container
+container-delete:
+	@docker container rm $(NAME)
+	@docker rmi $(IMAGE_NAME)
+	@docker rmi $(TAG)
+.PHONY: container-delete
 
 ## Run API tests with tox
 api-test:
 	tox -e test -- -m "not scrapingtest"
 .PHONY: api-test
+
+## Run dashboard app with tox
+app:
+	tox -e app
+.PHONY: app
 
 #################################################################################
 # PROJECT RULES                                                                 #

@@ -1,0 +1,9 @@
+<div style="background-color:white;border: 2px solid white;">
+<span style="font-size: {{ tool_title_fontsize }}px;font-weight: bold;">@{{ tool_title }}</span>
+{%- for colname, title, fontsize in data_list %}
+    <div>
+        <span style="font-size: {{ fontsize+1 }}px;font-weight: bold;color: #0EBFE9;">
+        {{ title }}: </span><span style="font-size: {{ fontsize }}px;">@{{ colname }}</span>
+    </div>
+{% endfor -%}
+<div>

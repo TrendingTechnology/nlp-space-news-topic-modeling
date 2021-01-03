@@ -5,10 +5,10 @@ ARG ENDPOINT_SUFFIX_ARG=abcd
 ARG AZURE_STORAGE_ACCOUNT_ARG=abcd
 ARG PORT_ARG=3080
 
-WORKDIR /api
+WORKDIR /app
 
-COPY ./api /api
-# RUN ls -la /api/*
+COPY ./app /app
+# RUN ls -la /app/*
 
 RUN pip install -r requirements.txt
 # RUN pip freeze
@@ -20,5 +20,7 @@ ENV AZURE_STORAGE_KEY=$AZURE_STORAGE_KEY_ARG \
 
 EXPOSE $PORT
 
-ENTRYPOINT [ "python3" ]
-CMD ["main.py"]
+RUN python3 app_download_data.py
+
+ENTRYPOINT [ "python3", "-m" ]
+CMD ["panel", "serve", "--port=5006", "--allow-websocket-origin=localhost:8000", "panel_file2.py", "--dev"]

@@ -16,14 +16,20 @@ jobs:
       - run: pip install tox
       - run: make lint
       - run: make api-test
+      - run: |
+          make container-build
+          make container-run
+          docker ps -q | xargs -L 1 docker logs
+          make container-stop
+          make container-delete
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
           AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
           ENDPOINT_SUFFIX: ${{ secrets.ENDPOINT_SUFFIX }}
-      - run: make ci
-        env:
-          GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
-          NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
-          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
-          ENDPOINT_SUFFIX: ${{ secrets.ENDPOINT_SUFFIX }}
+      # - run: make ci
+      #   env:
+      #     GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
+      #     NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
+      #     AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+      #     AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+      #     ENDPOINT_SUFFIX: ${{ secrets.ENDPOINT_SUFFIX }}
