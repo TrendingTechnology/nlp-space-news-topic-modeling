@@ -53,7 +53,7 @@ container-api-build:
 .PHONY: container-api-build
 
 ## Run API in container
-container-run:
+container-api-run:
 	@docker run -d -p $(PORT_MAP) --name $(NAME) $(TAG)
 .PHONY: container-api-run
 

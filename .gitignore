@@ -85,5 +85,7 @@ target/
 # Mypy cache
 .mypy_cache/
 
-# dask worker dir
-dask-worker-space/
+# exclude data from source control by default
+/data/
+/app/data/
+/api/data/
