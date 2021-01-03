@@ -18,12 +18,14 @@ def test_root():
     assert len(response.history) == 0
     assert response.status_code == 200
     assert response.url == "http://testserver/"
+    assert response.json()["message"] == "Hello World"
 
 
 def test_docs_redirect():
     response = client.get("/docs")
     assert type(response.history) == list
-    assert response.status_code == 404
+    assert len(response.history) == 0
+    assert response.status_code == 200
     assert response.url == "http://testserver/docs"
 
 

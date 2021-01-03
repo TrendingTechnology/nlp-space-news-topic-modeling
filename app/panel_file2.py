@@ -294,6 +294,7 @@ cb = pn.state.add_periodic_callback(update, 200, timeout=5000)
 
 desc_sidebar_pane = adh.generate_sidebar_html()
 
+panel_template.header_background = "darkgreen"
 panel_template.sidebar.append(widgets)
 panel_template.sidebar.append(progress)
 panel_template.sidebar.append(desc_sidebar_pane)

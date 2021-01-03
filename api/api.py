@@ -76,9 +76,14 @@ Urls = List[Url]
 app = FastAPI(
     title="Space News Article Topic Predictor API",
     description=description,
-    docs_url="/",
+    # docs_url="/",
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 
 @app.post("/predict")
