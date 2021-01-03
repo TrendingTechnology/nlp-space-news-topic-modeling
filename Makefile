@@ -4,8 +4,8 @@
 
 # api/ uses DOCKERFILE_NAME=Dockerfile with APP_PORT=8050
 # app/ uses DOCKERFILE_NAME=Dockerfile_app with APP_PORT=5006
-DOCKERFILE_NAME=Dockerfile_app
-APP_PORT=5006
+DOCKERFILE_NAME=Dockerfile
+APP_PORT=8050
 IMAGE_NAME=python:3.8.6-slim-buster
 TAG=edesz/my-containerized-app
 NAME=mycontainer
@@ -42,20 +42,35 @@ api:
 	tox -e api
 .PHONY: api
 
-## Build container
-container-build:
+## Build API in container
+container-api-build:
 	@docker build -t $(TAG) \
 	    --build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
 		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
 		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
 		--build-arg PORT_ARG=$(APP_PORT) \
 		-f $(DOCKERFILE_NAME) .
-.PHONY: container-build
+.PHONY: container-api-build
 
-## Run in container
+## Run API in container
 container-run:
 	@docker run -d -p $(PORT_MAP) --name $(NAME) $(TAG)
-.PHONY: container-run
+.PHONY: container-api-run
+
+## Build APP in container
+container-app-build:
+	@docker build -t $(TAG) \
+	    --build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
+		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
+		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
+		--build-arg PORT_ARG=5006 \
+		-f Dockerfile_app .
+.PHONY: container-app-build
+
+## Run APP in container
+container-app-run:
+	@docker run -d -p 8000:5006 --name $(NAME) $(TAG)
+.PHONY: container-app-run
 
 ## Show streaming container logs
 container-logs:

@@ -111,6 +111,7 @@ def get_description_html(
     {create_description_header_html()}
 
     {image_grid_html}
+    Photos from [nasa.gov](https://www.nasa.gov/).
 
     {create_acceptable_urls_markdown(unseen_urls_filepath)}
     """
