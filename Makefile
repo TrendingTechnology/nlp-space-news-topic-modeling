@@ -97,6 +97,12 @@ container-delete:
 	@docker rmi $(TAG)
 .PHONY: container-delete
 
+## Remove all containers
+container-delete-all:
+	@docker rm -f $(docker ps -a -q)
+	@docker rmi -f $(docker images -a -q)
+.PHONY: container-delete-all
+
 ## Run API tests with tox
 api-test:
 	tox -e test -- -m "not scrapingtest"
