@@ -12,12 +12,12 @@ client = TestClient(app)
 
 
 def test_root():
-    response = client.get("/api/v1/topics/")
+    response = client.get("/")
     assert type(response.history) == list
     assert len(response.history) == 0
     assert response.status_code == 200
-    assert response.url == "http://testserver/api/v1/topics/"
-    assert response.json()["message"] == "Hello World"
+    assert response.url == "http://testserver/"
+    assert response.json()["message"] == "Hello World!"
 
 
 def test_docs_redirect():
