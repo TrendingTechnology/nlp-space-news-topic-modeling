@@ -24,14 +24,14 @@ jobs:
         run: |
           make container-api-build
           make container-api-run
-          make container-stop
-          make container-delete
+          make container-api-stop
+          make container-api-delete
       - name: Run APP in container
         run: |
           make container-app-build
           make container-app-run
-          make container-stop
-          make container-delete
+          make container-app-stop
+          make container-app-delete
       # - run: make ci
       #   env:
       #     GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
