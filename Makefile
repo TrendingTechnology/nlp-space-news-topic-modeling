@@ -3,17 +3,23 @@
 #################################################################################
 
 # api/ uses
-# - DOCKERFILE_NAME=Dockerfile with APP_PORT=8050
+# - DOCKERFILE_NAME=Dockerfile
+# - APP_PORT=8050
 # - IMAGE_NAME=tiangolo/uvicorn-gunicorn-fastapi:python3.8
 # app/ uses
-# - DOCKERFILE_NAME=Dockerfile_app with APP_PORT=5006
-# - IMAGE_NAME=python:3.8.6-slim-buster
-DOCKERFILE_NAME=Dockerfile
-APP_PORT=8050
-IMAGE_NAME=tiangolo/uvicorn-gunicorn-fastapi:python3.8
+# - DOCKERFILE_NAME=Dockerfile_app
+# - APP_PORT=5006
+# - IMAGE_NAME_APP=python:3.8.6-slim-buster
+DOCKERFILE_NAME_API=Dockerfile
+APP_PORT_API=8050
+IMAGE_NAME_API=tiangolo/uvicorn-gunicorn-fastapi:python3.8
+DOCKERFILE_NAME_APP=Dockerfile_app
+APP_PORT_APP=5006
+IMAGE_NAME_APP=python:3.8.6-slim-buster
 TAG=edesz/my-containerized-app
 NAME=mycontainer
-PORT_MAP=8000:$(APP_PORT)
+PORT_MAP_API=8000:$(APP_PORT_API)
+PORT_MAP_APP=8000:$(APP_PORT_APP)
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -52,16 +58,16 @@ container-api-build:
 		--build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
 		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
 		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
-		--build-arg PORT_ARG=$(APP_PORT) \
-		-f $(DOCKERFILE_NAME) .
+		--build-arg PORT_ARG=$(APP_PORT_API) \
+		-f $(DOCKERFILE_NAME_API) .
 .PHONY: container-api-build
 
 ## Run API in container
 container-api-run:
-	@docker run -d -p $(PORT_MAP) \
+	@docker run -d -p $(PORT_MAP_API) \
 	    -e APP_MODULE="main:app" \
-		-e PORT="$(APP_PORT)" \
-		-e BIND="0.0.0.0:$(APP_PORT)" \
+		-e PORT="$(APP_PORT_API)" \
+		-e BIND="0.0.0.0:$(APP_PORT_API)" \
 		--name $(NAME) $(TAG)
 .PHONY: container-api-run
 
@@ -72,12 +78,12 @@ container-app-build:
 		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
 		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
 		--build-arg PORT_ARG=5006 \
-		-f Dockerfile_app .
+		-f $(DOCKERFILE_NAME_APP) .
 .PHONY: container-app-build
 
 ## Run APP in container
 container-app-run:
-	@docker run -d -p 8000:5006 --name $(NAME) $(TAG)
+	@docker run -d -p $(PORT_MAP_APP) --name $(NAME) $(TAG)
 .PHONY: container-app-run
 
 ## Show streaming container logs
@@ -85,17 +91,29 @@ container-logs:
 	@docker ps -q | xargs -L 1 docker logs -f
 .PHONY: container-logs
 
-## Stop container
-container-stop:
+## Stop API container
+container-api-stop:
 	@docker container stop $(NAME)
-.PHONY: container-stop
+.PHONY: container-api-stop
 
-## Remove container
-container-delete:
+## Remove API container
+container-api-delete:
 	@docker container rm $(NAME)
-	@docker rmi $(IMAGE_NAME)
+	@docker rmi $(IMAGE_NAME_API)
 	@docker rmi $(TAG)
-.PHONY: container-delete
+.PHONY: container-api-delete
+
+## Stop APP container
+container-app-stop:
+	@docker container stop $(NAME)
+.PHONY: container-app-stop
+
+## Remove APP container
+container-app-delete:
+	@docker container rm $(NAME)
+	@docker rmi $(IMAGE_NAME_APP)
+	@docker rmi $(TAG)
+.PHONY: container-app-delete
 
 ## Remove all containers
 container-delete-all:

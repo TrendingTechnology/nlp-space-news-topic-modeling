@@ -96,7 +96,9 @@ daterange = bhm.DateRangeSlider(
     start=date(2019, 11, 2),
     end=date(2020, 2, 28),
 )
-progress = pn.widgets.Progress(name="Progress", value=100, width=250)
+progress = pn.widgets.Progress(
+    name="Progress", sizing_mode="stretch_width", value=100
+)
 
 # set up data sources
 source = bhm.ColumnDataSource(data=dict(count=[], weekday=[]))
@@ -105,9 +107,10 @@ source_topics = bhm.ColumnDataSource(data=dict(count=[], topic=[]))
 source_weights = bhm.ColumnDataSource(
     data=dict(term_weight=[], term=[], topic=[])
 )
-source_ner = bhm.ColumnDataSource(
-    data=dict(entity_count=[], entity=[], topic=[])
+ner_data_dict = dict(
+    entity_count=[], entity=[], topic=[], start_date=[], end_date=[]
 )
+source_ner = bhm.ColumnDataSource(data=ner_data_dict)
 df_groups = adh.load_data(data_filepath)
 group = df_groups.groupby("topic")
 source_group = ColumnDataSource(data=group)
@@ -185,6 +188,8 @@ entity_counts_bar_chart = abh.bokeh_horiz_bar_chart(
         data_list=[
             ["entity", "Name", 14],
             ["entity_count", "Occurrences", 14],
+            ["start_date", "First News Article", 14],
+            ["end_date", "Last News Article", 14],
         ],
         tool_title_fontsize=16,
         tool_title="topic",

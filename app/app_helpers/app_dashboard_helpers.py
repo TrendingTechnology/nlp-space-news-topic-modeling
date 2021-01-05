@@ -143,6 +143,8 @@ def perform_updates(
     df_new_filtered, df_topic_filtered = get_data(
         start_date, end_date, topic_selected, data_filepath
     )
+    t_dates = pd.to_datetime(df_topic_filtered["date"]).dt.strftime("%Y-%m-%d")
+    # print(t_dates)
     update_progress(
         start_date,
         end_date,
@@ -179,17 +181,16 @@ def perform_updates(
         "term": df_topic_filtered.iloc[0]["term"],
         "topic": [topic_selected] * len(df_topic_filtered.iloc[0]["term"]),
     }
+    num_ner_rows = len(df_topic_filtered.iloc[0]["entity"])
     d_ner = {
         "entity_count": df_topic_filtered.iloc[0]["entity_count"],
         "entity": df_topic_filtered.iloc[0]["entity"],
-        "topic": [topic_selected] * len(df_topic_filtered.iloc[0]["entity"]),
+        "topic": [topic_selected] * num_ner_rows,
     }
     # print(d_terms)
     df_terms = pd.DataFrame.from_dict(d_terms, orient="index").T
     source_weights.data = df_terms
     term_weights_bar_chart.y_range.factors = df_terms["term"].tolist()[::-1]
-    t_dates = pd.to_datetime(df_topic_filtered["date"]).dt.strftime("%Y-%m-%d")
-    # print(t_dates)
     topic_date_str = (
         f"{topic_selected} ({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
     )
@@ -198,10 +199,7 @@ def perform_updates(
     df_ner = pd.DataFrame.from_dict(d_ner, orient="index").T
     source_ner.data = df_ner
     entity_counts_bar_chart.y_range.factors = df_ner["entity"].tolist()[::-1]
-    ner_date_str = (
-        f"Occurrences of Organizations "
-        f"({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
-    )
+    ner_date_str = f"Organizations ({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
     entity_counts_bar_chart.title.text = ner_date_str
     entity_counts_bar_chart.xaxis.axis_label = topic_selected
     source.data = df_weekdays
