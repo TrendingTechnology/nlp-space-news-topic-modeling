@@ -5,19 +5,18 @@
 import os
 
 import pytest
+from apit import app
 from starlette.testclient import TestClient
-
-from api import app
 
 client = TestClient(app)
 
 
 def test_root():
-    response = client.get("/")
+    response = client.get("/api/v1/topics/")
     assert type(response.history) == list
     assert len(response.history) == 0
     assert response.status_code == 200
-    assert response.url == "http://testserver/"
+    assert response.url == "http://testserver/api/v1/topics/"
     assert response.json()["message"] == "Hello World"
 
 
@@ -37,10 +36,11 @@ def test_predictor_multi_input_predict_from_url():
     )
     json_input = [{"url": test_url}]
     response = client.post(
-        "/predict",
+        "/api/v1/topics/predict",
         json=json_input,
     )
     assert response.status_code == 200
+    assert response.url == "http://testserver/api/v1/topics/predict"
     records = response.json()
     assert len(records) == 1
 
@@ -61,10 +61,11 @@ def test_predictor_multi_input_predict_from_file(
         filebody = f.read()
     local_file_path = str(az_blob_data_tmp_file_path["local_file_path"])
     response = client.post(
-        "/uploadcsv",
+        "/api/v1/topics/uploadcsv",
         files={"data_filepath": (local_file_path, filebody)},
     )
     assert response.status_code == 200
+    assert response.url == "http://testserver/api/v1/topics/uploadcsv"
     records = response.json()
     assert len(records) == 5
 

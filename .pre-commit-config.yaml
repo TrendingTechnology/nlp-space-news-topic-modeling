@@ -38,6 +38,8 @@ repos:
       exclude: |
           (?x)(
               ^executed_notebooks/|
+              api/static/|
+              api/templates/|
               \.(ipynb)$
           )
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -50,7 +52,9 @@ repos:
       verbose: true
       exclude: |
           (?x)(
-              ^executed_notebooks/
+              ^executed_notebooks/|
+              api/static/|
+              api/templates/
           )
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.0

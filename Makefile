@@ -2,11 +2,15 @@
 # GLOBALS                                                                       #
 #################################################################################
 
-# api/ uses DOCKERFILE_NAME=Dockerfile with APP_PORT=8050
-# app/ uses DOCKERFILE_NAME=Dockerfile_app with APP_PORT=5006
+# api/ uses
+# - DOCKERFILE_NAME=Dockerfile with APP_PORT=8050
+# - IMAGE_NAME=tiangolo/uvicorn-gunicorn-fastapi:python3.8
+# app/ uses
+# - DOCKERFILE_NAME=Dockerfile_app with APP_PORT=5006
+# - IMAGE_NAME=python:3.8.6-slim-buster
 DOCKERFILE_NAME=Dockerfile
 APP_PORT=8050
-IMAGE_NAME=python:3.8.6-slim-buster
+IMAGE_NAME=tiangolo/uvicorn-gunicorn-fastapi:python3.8
 TAG=edesz/my-containerized-app
 NAME=mycontainer
 PORT_MAP=8000:$(APP_PORT)
@@ -45,7 +49,7 @@ api:
 ## Build API in container
 container-api-build:
 	@docker build -t $(TAG) \
-	    --build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
+		--build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
 		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
 		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
 		--build-arg PORT_ARG=$(APP_PORT) \
@@ -54,13 +58,17 @@ container-api-build:
 
 ## Run API in container
 container-api-run:
-	@docker run -d -p $(PORT_MAP) --name $(NAME) $(TAG)
+	@docker run -d -p $(PORT_MAP) \
+	    -e APP_MODULE="main:app" \
+		-e PORT="$(APP_PORT)" \
+		-e BIND="0.0.0.0:$(APP_PORT)" \
+		--name $(NAME) $(TAG)
 .PHONY: container-api-run
 
 ## Build APP in container
 container-app-build:
 	@docker build -t $(TAG) \
-	    --build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
+		--build-arg AZURE_STORAGE_KEY_ARG=$(AZURE_STORAGE_KEY) \
 		--build-arg ENDPOINT_SUFFIX_ARG=$(ENDPOINT_SUFFIX) \
 		--build-arg AZURE_STORAGE_ACCOUNT_ARG=$(AZURE_STORAGE_ACCOUNT) \
 		--build-arg PORT_ARG=5006 \

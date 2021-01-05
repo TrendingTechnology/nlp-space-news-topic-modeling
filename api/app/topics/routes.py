@@ -2,24 +2,19 @@
 # -*- coding: utf-8 -*-
 
 
-"""Space News Article Topic Predictor API."""
-
-
 import os
 from typing import Any, List, Mapping
 
 import api_helpers.api_scraping_helpers as apih
 import api_helpers.api_topic_predictor as tp
-import api_helpers.api_utility_helpers as lh
 import pandas as pd
 from api_helpers.api_loading_helpers import handle_upload_file
-from fastapi import FastAPI, File, UploadFile
+from fastapi import APIRouter, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from joblib import load
 from pydantic import BaseModel
 
-PROJ_ROOT_DIR = os.getcwd()
-jinja2_templates_dir = os.path.join(PROJ_ROOT_DIR, "templates")
+router = APIRouter()
 
 pipe_filepath = "data/nlp_pipe.joblib"
 topic_names_filepath = "data/nlp_topic_names.csv"
@@ -36,12 +31,6 @@ azure_blob_file_dict = {
     "blobedesz41": pipe_filepath,
     "blobedesz43": topic_residuals_filepath,
 }
-unseen_urls_filepath = os.path.join(
-    PROJ_ROOT_DIR, "api_helpers", "api_unseen_article_urls.yml"
-)
-api_image_specs_filepath = os.path.join(
-    PROJ_ROOT_DIR, "api_helpers", "api_image_specs.yml"
-)
 
 # Data download from blob storage, if not found locally
 if not os.path.exists(pipe_filepath):
@@ -52,14 +41,6 @@ df_named_topics = pd.read_csv(topic_names_filepath, index_col="topic_num")
 df_residuals_new = pd.read_csv(
     topic_residuals_filepath, parse_dates=["start_date", "end_date"]
 )
-description = lh.get_description_html(
-    jinja2_templates_dir,
-    "linked_image_grid.j2",
-    unseen_urls_filepath,
-    api_image_specs_filepath,
-    6,
-)
-# print(description)
 
 
 class Url(BaseModel):
@@ -73,20 +54,8 @@ class Url(BaseModel):
 
 Urls = List[Url]
 
-app = FastAPI(
-    title="Space News Article Topic Predictor API",
-    description=description,
-    # docs_url="/",
-)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.post("/predict")
+@router.post("/predict")
 async def predict_from_url(
     urls: Urls,
 ) -> Mapping[str, Any]:
@@ -139,7 +108,7 @@ async def predict_from_url(
     return response_dict
 
 
-@app.post("/uploadcsv")
+@router.post("/uploadcsv")
 async def predict_from_file(
     data_filepath: UploadFile = File(...),
 ) -> Mapping[str, Any]:

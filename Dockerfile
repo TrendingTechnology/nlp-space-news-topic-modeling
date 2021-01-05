@@ -1,4 +1,5 @@
-FROM python:3.8.6-slim-buster
+# FROM python:3.8.6-slim-buster
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 ARG AZURE_STORAGE_KEY_ARG=abcd
 ARG ENDPOINT_SUFFIX_ARG=abcd
@@ -10,7 +11,12 @@ WORKDIR /api
 COPY ./api /api
 # RUN ls -la /api/*
 
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip \
+    && pip install -r requirements.txt \
+    && find /usr/local/lib/python$PY_VERSION -name '*.c' -delete \
+    && find /usr/local/lib/python$PY_VERSION -name '*.pxd' -delete \
+    && find /usr/local/lib/python$PY_VERSION -name '*.pyd' -delete \
+    && find /usr/local/lib/python$PY_VERSION -name '__pycache__' | xargs rm -r
 # RUN pip freeze
 
 ENV AZURE_STORAGE_KEY=$AZURE_STORAGE_KEY_ARG \
@@ -18,7 +24,7 @@ ENV AZURE_STORAGE_KEY=$AZURE_STORAGE_KEY_ARG \
     AZURE_STORAGE_ACCOUNT=$AZURE_STORAGE_ACCOUNT_ARG \
     PORT=$PORT_ARG
 
-EXPOSE $PORT
+# EXPOSE $PORT
 
-ENTRYPOINT [ "python3" ]
-CMD ["main.py"]
+# ENTRYPOINT [ "python3" ]
+# CMD ["main.py"]
