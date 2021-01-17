@@ -32,7 +32,7 @@ jobs:
           make container-app-run
           make container-app-stop
           make container-app-delete
-      # - run: make ci
-      #   env:
-      #     GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
-      #     NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
+      - run: make ci
+        env:
+          GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
+          NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
