@@ -26,6 +26,9 @@ ending_date = date(2020, 2, 27)  # date of last unseen news article
 pipe_filepath = "data/nlp_pipe.joblib"
 topic_names_filepath = "data/nlp_topic_names.csv"
 topic_residuals_filepath = "data/nlp_topic_residuals.csv"
+topic_training_residuals_statistics_filepath = (
+    "data/training_residuals_for_api_webpage.csv"
+)
 urls_to_read = 1
 n_topics_wanted = 35
 n_top_words = 10
@@ -37,6 +40,7 @@ azure_blob_file_dict = {
     "blobedesz40": topic_names_filepath,
     "blobedesz41": pipe_filepath,
     "blobedesz43": topic_residuals_filepath,
+    "blobedesz39": topic_training_residuals_statistics_filepath,
 }
 
 # Data download from blob storage, if not found locally

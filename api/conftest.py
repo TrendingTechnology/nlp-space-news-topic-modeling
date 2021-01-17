@@ -9,6 +9,11 @@ from api_helpers.api_scraping_helpers import download_az_file_blobs
 from tests.testing_utils import data_loader as dl
 
 dict_blob_to_local = {
+    "training_residuals_file_path": {
+        "blob_name": "blobedesz39",
+        "local": "training_residuals_for_api_webpage.csv",
+        "nrows": None,
+    },
     "local_file_path": {
         "blob_name": "blobedesz42",
         "local": "guardian_3.csv",
