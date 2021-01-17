@@ -68,12 +68,9 @@ def generate_linked_image_grid(
 
 
 def create_acceptable_urls_markdown(unseen_urls_filepath):
-    base_url = "https://www.theguardian.com/science"
     with open(unseen_urls_filepath, "r") as f:
         guardian_urls = [x.lstrip("- ").rstrip("\n") for x in f if "-" in x]
-    guardian_urls = [
-        f"[{k+1}]({base_url}/{url})" for k, url in enumerate(guardian_urls)
-    ]
+    guardian_urls = [f"[{k+1}]({url})" for k, url in enumerate(guardian_urls)]
     # for url in guardian_urls:
     #     print(url)
     acceptable_urls = ", ".join(guardian_urls)

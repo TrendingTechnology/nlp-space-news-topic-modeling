@@ -985,3 +985,53 @@ def altair_plot_triangular_heatmap(
     elif show_triangle == "upper":
         chart = chart.transform_filter(f"datum.{xvar} >= datum.{yvar}")
     return chart
+
+
+def altair_plot_bar_chart_value_counts_sortable(
+    df,
+    ptitle,
+    xvar,
+    yvar,
+    labelFontSize=12,
+    titleFontSize=12,
+    plot_titleFontSize=16,
+    dx=30,
+    offset=-5,
+    tooltip=[],
+    x_tick_label_angle=-45,
+    horiz_bar_chart=False,
+    horiz_label_limit=180,  # default=180
+    sort_y="=-y",
+    fig_size=(650, 250),
+):
+    chart = (
+        alt.Chart(
+            df,
+            title=ptitle,
+        )
+        .mark_bar()
+        .encode(
+            x=alt.X(f"{xvar}", title=""),
+            y=alt.Y(f"{yvar}", title="", sort=sort_y),
+            tooltip=tooltip,
+        )
+        .configure_mark(color="#4287f5")
+        .configure_axis(
+            labelFontSize=labelFontSize, titleFontSize=titleFontSize
+        )
+        .configure_axisX(labelAngle=x_tick_label_angle)
+        # .configure_axisY(labelLimit=horiz_label_limit, labelAlign="right")
+        .properties(width=fig_size[0], height=fig_size[1])
+        .configure_title(
+            fontSize=plot_titleFontSize,
+            anchor="start",
+            dx=dx,
+            offset=offset,
+        )
+    )
+    if horiz_bar_chart:
+        x_tick_label_angle = 0
+        chart = chart.configure_axisX(labelAngle=0).configure_axisY(
+            labelLimit=horiz_label_limit, labelAlign="right"
+        )
+    return chart

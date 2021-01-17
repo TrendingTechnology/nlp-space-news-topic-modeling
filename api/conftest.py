@@ -6,7 +6,7 @@ import os
 
 import pytest
 from api_helpers.api_scraping_helpers import download_az_file_blobs
-from tests.testing_utils import helpers as dh
+from tests.testing_utils import data_loader as dl
 
 dict_blob_to_local = {
     "local_file_path": {
@@ -36,7 +36,7 @@ def az_blob_data_tmp_file_path(tmp_path):
     for local_file_path, v in dict_blob_to_local.items():
         file_path = d / v["local"]
         if not os.path.exists(file_path):
-            df = dh.load_az_blob_data(
+            df = dl.load_az_blob_data(
                 az_blob_name=v["blob_name"], n_rows=v["nrows"]
             )
             df.to_csv(file_path, index=False)

@@ -49,8 +49,13 @@ def make_predictions(df, pipe, n_top_words, n_topics_wanted, df_named_topics):
     #     print(k, ",".join(v[1:-1]))
 
     df_temp = (
-        pd.DataFrame(doc_topic).idxmax(axis=1).rename("topic_num").to_frame()
+        pd.DataFrame(doc_topic)
+        .idxmax(axis=1)
+        .rename("topic_num")
+        .to_frame()
+        .assign(url=df["url"].tolist())
     )
+    assert df_temp["url"].tolist() == df["url"].tolist()
 
     merged_topic = df_temp.merge(topic_df, on="topic_num", how="left").assign(
         url=df["url"].tolist()
@@ -58,6 +63,9 @@ def make_predictions(df, pipe, n_top_words, n_topics_wanted, df_named_topics):
     df_topics = df.merge(merged_topic, on="url", how="left").astype(
         {"topic_num": int}
     )
+    assert pd.to_datetime(df_topics["date"]).is_monotonic
+    assert df_topics["url"].tolist() == df["url"].tolist()
+    assert df["url"].equals(df_topics["url"])
     base_cols = [
         "url",
         "date",
@@ -70,7 +78,9 @@ def make_predictions(df, pipe, n_top_words, n_topics_wanted, df_named_topics):
     df_topics_new = df_topics[
         base_cols + ["topic_num", "topic"] + list(range(n_top_words))
     ].merge(
-        df_named_topics.reset_index()[["topic_num", "best"]], on="topic_num"
+        df_named_topics.reset_index()[["topic_num", "best"]],
+        on="topic_num",
+        how="left",
     )[
         [
             "url",
@@ -103,9 +113,16 @@ def generate_response(
     n_topics_wanted,
     df_named_topics,
     df_residuals_new,
+    n_days=1,
 ):
+    # pipe comes from nlp_pipe.joblib
+    # df_named_topics comes from nlp_topic_names.csv
+    df_new = add_datepart(df_new)
+    data_n_days = (df_new["date"].max() - df_new["date"].min()).days
+    # print(n_days, data_n_days, type(n_days), type(data_n_days))
+    df_new = df_new.sort_values(by=["date"]).reset_index(drop=True)
     df_predicted_new_topics, df_topic_word_factors = make_predictions(
-        add_datepart(df_new),
+        df_new,
         pipe,
         n_top_words,
         n_topics_wanted,
@@ -135,22 +152,38 @@ def generate_response(
     weights_series = df_topic_word_factors.groupby("topic_num")[
         ["term", "term_weight"]
     ].agg(list)
-    ents_series = df_residuals_new.groupby("topic")[
-        ["entity", "entity_count"]
-    ].agg(list)
+
+    ents_series = pd.Series()
+    df_residuals_new_reshaped = pd.DataFrame()
+    if data_n_days == n_days:
+        # df_residuals_new comes from nlp_topic_residuals.csv
+        ents_series = df_residuals_new.groupby("topic")[
+            ["entity", "entity_count"]
+        ].agg(list)
     df_response = df_predicted_new_topics.merge(
-        weights_series.reset_index(), on="topic_num"
-    ).merge(ents_series.reset_index(), on="topic")[cols_wanted]
+        weights_series.reset_index(), on="topic_num", how="left"
+    )
+    if data_n_days == n_days:
+        df_response = df_response.merge(
+            ents_series.reset_index(), on="topic", how="left"
+        )[cols_wanted]
+    assert df_new["url"].equals(df_response["url"])
+    assert df_new["url"].tolist() == df_response["url"].tolist()
     # print(df_response.head(10))
     # print(df_residuals_new.head(10))
-    df_residuals_new_reshaped = (
-        df_residuals_new.groupby("topic")[
-            ["resid_min", "resid_max", "resid_perc25", "resid_perc75"]
-        ]
-        .first()
-        .reset_index()
-    )
-    df_response = df_response.merge(df_residuals_new_reshaped, on="topic")
+    if data_n_days == n_days:
+        df_residuals_new_reshaped = (
+            df_residuals_new.groupby("topic")[
+                ["resid_min", "resid_max", "resid_perc25", "resid_perc75"]
+            ]
+            .first()
+            .reset_index()
+        )
+        df_response = df_response.merge(
+            df_residuals_new_reshaped, on="topic", how="left"
+        )
+    assert df_new["url"].equals(df_response["url"])
+    assert df_new["url"].tolist() == df_response["url"].tolist()
     # print(list(df_response))
     # print(df_response.shape)
     # print(df_response.iloc[:5, :10])

@@ -19,6 +19,12 @@ repos:
       args: ['--ignore=W605,C901,F401']
       language_version: python3.8
       verbose: true
+      exclude: |
+          (?x)(
+              ^api/static/|
+              api/templates/|
+              \.(ipynb)$
+          )
   - repo: https://github.com/timothycrosley/isort
     rev: 5.7.0
     hooks:
@@ -62,7 +68,7 @@ repos:
     - id: bandit
       name: Ensure compliance with security checks
       language_version: python3.8
-      args: ["--quiet", "--recursive", '--skip=B104,B101']
+      args: ["--quiet", "--recursive", '--skip=B104,B101,B608']
       verbose: true
       files: \.(py)$
       exclude: |

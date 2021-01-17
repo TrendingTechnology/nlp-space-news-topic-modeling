@@ -2,20 +2,27 @@
 # -*- coding: utf-8 -*-
 
 
+import asyncio
 import os
+from datetime import date
 from typing import Any, List, Mapping
 
+import aiohttp
 import api_helpers.api_scraping_helpers as apih
 import api_helpers.api_topic_predictor as tp
+import numpy as np
 import pandas as pd
 from api_helpers.api_loading_helpers import handle_upload_file
-from fastapi import APIRouter, FastAPI, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
+from bs4 import BeautifulSoup
+from fastapi import APIRouter, File, UploadFile
 from joblib import load
 from pydantic import BaseModel
 
 router = APIRouter()
 
+# dates of unseen news articles that will be used to determine returned keys
+beginning_date = date(2019, 11, 2)  # date of first unseen news article
+ending_date = date(2020, 2, 27)  # date of last unseen news article
 pipe_filepath = "data/nlp_pipe.joblib"
 topic_names_filepath = "data/nlp_topic_names.csv"
 topic_residuals_filepath = "data/nlp_topic_residuals.csv"
@@ -41,6 +48,8 @@ df_named_topics = pd.read_csv(topic_names_filepath, index_col="topic_num")
 df_residuals_new = pd.read_csv(
     topic_residuals_filepath, parse_dates=["start_date", "end_date"]
 )
+n_days = (ending_date - beginning_date).days
+# print(n_days)
 
 
 class Url(BaseModel):
@@ -53,6 +62,29 @@ class Url(BaseModel):
 
 
 Urls = List[Url]
+zip_texts = dict()
+
+
+class RetrieveTextForUrl(BaseModel):
+
+    url = str
+
+    @classmethod
+    async def retrieve_text(cls, url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                content = await response.read()
+                # print(content)
+                try:
+                    soup = BeautifulSoup(content.decode("utf-8"), "lxml")
+                    # print(soup.prettify())
+                except Exception as e:
+                    print(f"Experienced error {str(e)} when scraping {url}")
+                    text = np.nan
+                else:
+                    text = apih.get_guardian_text_from_soup(soup)
+                # print(text)
+        zip_texts.update({url: text})
 
 
 @router.post("/predict")
@@ -64,39 +96,131 @@ async def predict_from_url(
     Parameters
     ----------
     urls : Dict[str: str]
-    - news article url to be retrieved
+      - news article url(s) to be retrieved
 
     Example Inputs
     --------------
-    ```
-    [
-        {"url": "https://www.google.com"},
-        {"url": "https://www.yahoo.com"}
-    ]
-    ```
+    - multiple news article urls
+        ```
+        [
+            {"url": "https://www.google.com"},
+            {"url": "https://www.yahoo.com"}
+        ]
+        ```
 
-    ```
-    [
-        {"url": "https://www.google.com"}
-    ]
-    ```
+    - single news article url
+        ```
+        [
+            {"url": "https://www.google.com"}
+        ]
+        ```
 
     Returns
     -------
     news article topic, text and other predicted/metadata : Dict[str: str]
-    - predicted topic and article text, eg.
-      ```
-      {
-          "url": "https://www.google.com",
-          "text": "abcd"
-          "topic_num": "32",
-          "topic": 32,
-          "best": "Topic Name Here"
-      }
-      ```
+    - predicted topic, metadata and related quantities
+      - for single news article url
+        - `url`
+          - news article url
+        - `date`
+          - news article publication date
+        - `year`
+          - year of publication
+        - `week_of_month`
+          - week of month in which article was published
+        - `weekday`
+          - day of week on which article was published
+        - `month`
+          - month of year in which article was published
+        - `text`
+          - retrieved text of news article
+        - `topic_num`
+          - arbitrarily assigned topic internal number
+        - `topic`
+          - predicted name of topic
+        - `term`
+          - top 10 NLP tokens for topic, found during training
+        - `term_weight`
+          - weighted TFIDF term weights, found during training
+        ```
+        {
+            "url": "https://www.google.com",
+            "date": "1900-01-01T00:00:00",
+            "year": "1900",
+            "week_of_month": 1,
+            "weekday": "Monday",
+            "month": "Jan",
+            "text": "<full article text>",
+            "topic_num": <internally assigned topic number from 1 to 35>,
+            "topic": "<topic name>",
+            "term": [
+                "abc",
+                "defg",
+                .
+                .
+                .
+            ],
+            "term_weight": [
+                0.100,
+                0.200,
+                .
+                .
+                .
+            ]
+        }
+        ```
+      - additional keys, if all acceptable news article urls
+        - `entity`
+          - up to 10 most frequently occurring organizations in article
+        - `entity_count`
+          - respective number of occurrences of organizations in article
+        - `resid_min`
+          - min. residual (Frobenius norm) between NMF approx. and true data
+        - `resid_max`
+          - max. residual between NMF approximation and true data
+        - `resid_perc25`
+          - 25th percentile of residual between NMF approx. and true data
+        - `resid_perc75`
+          - 75th percentile of residual between NMF approx. and true data
+        ```
+        {
+            "entity": [
+                "abc",
+                "defg",
+                .
+                .
+                .
+            ],
+            "entity_count": [
+                2,
+                2,
+                2,
+                .
+                .
+                .
+            ],
+            "resid_min": 0.1,
+            "resid_max": 0.2,
+            "resid_perc25": 0.12
+            "resid_perc75": 0.18
+        }
+        ```
     """
     guardian_urls = [dict(url)["url"] for url in urls]
-    df_new = apih.scrape_new_articles(guardian_urls)
+    # print(guardian_urls)
+    tasks = [
+        asyncio.create_task(RetrieveTextForUrl.retrieve_text(guardian_url))
+        for guardian_url in guardian_urls
+    ]
+    _ = await asyncio.gather(*tasks)
+    zip_texts_cleaned = {k: v for k, v in zip_texts.items() if type(v) is str}
+    # print(zip_texts_cleaned)
+    df_new = (
+        pd.DataFrame.from_dict(zip_texts_cleaned, orient="index")
+        .reset_index()
+        .rename(columns={"index": "url", 0: "text"})
+    )
+    # print(df_new)
     response_dict = tp.generate_response(
         df_new,
         pipe,
@@ -104,6 +228,7 @@ async def predict_from_url(
         n_topics_wanted,
         df_named_topics,
         df_residuals_new,
+        n_days,
     )
     return response_dict
 
@@ -114,38 +239,116 @@ async def predict_from_file(
 ) -> Mapping[str, Any]:
     """Predict topic from a CSV file of news article url & text.
 
-    Parameters
-    ----------
-    file : Dict[str: float]
-    - csv file with following for each news article
-      - url
-      - full text
+     Parameters
+     ----------
+     file : Dict[str: float]
+     - csv file with following for each news article
+       - url
+       - full text
 
-    Example Inputs
-    --------------
-    ```
-    url,text
-    https://www.google.com,abcd
-    https://www.yahoo.com,efgh
-    ```
+     Example Inputs
+     --------------
+     ```
+     url,text
+     https://www.google.com,abcd
+     https://www.yahoo.com,efgh
+     ```
 
-    ```
-    url,text
-    https://www.google.com,abcd
-    ```
+     ```
+     url,text
+     https://www.google.com,abcd
+     ```
 
     Returns
-    -------
-    news article topic, text and other predicted/metadata : Dict[str: str]
-    - predicted topic and article text, eg.
-      ```
-      {
-          "text": "abcd"
-          "topic_num": "32",
-          "topic": 32,
-          "best": "Topic Name Here"
-      }
-      ```
+     -------
+     news article topic, text and other predicted/metadata : Dict[str: str]
+     - predicted topic, metadata and related quantities
+       - for single news article text
+         - `url`
+           - news article url
+         - `date`
+           - news article publication date
+         - `year`
+           - year of publication
+         - `week_of_month`
+           - week of month in which article was published
+         - `weekday`
+           - day of week on which article was published
+         - `month`
+           - month of year in which article was published
+         - `text`
+           - retrieved text of news article
+         - `topic_num`
+           - arbitrarily assigned topic internal number
+         - `topic`
+           - predicted name of topic
+         - `term`
+           - top 10 NLP tokens for topic, found during training
+         - `term_weight`
+           - weighted TFIDF term weights, found during training
+         ```
+         {
+             "url": "https://www.google.com",
+             "date": "1900-01-01T00:00:00",
+             "year": "1900",
+             "week_of_month": 1,
+             "weekday": "Monday",
+             "month": "Jan",
+             "text": "<full article text>",
+             "topic_num": <internally assigned topic number from 1 to 35>,
+             "topic": "<topic name>",
+             "term": [
+                 "abc",
+                 "defg",
+                 .
+                 .
+                 .
+             ],
+             "term_weight": [
+                 0.100,
+                 0.200,
+                 .
+                 .
+                 .
+             ]
+         }
+         ```
+       - additional keys, if for all acceptable news article texts
+         - `entity`
+           - up to 10 most frequently occurring organizations in article
+         - `entity_count`
+           - respective number of occurrences of organizations in article
+         - `resid_min`
+           - min. residual (Frobenius norm) between NMF approx. and true data
+         - `resid_max`
+           - max. residual between NMF approximation and true data
+         - `resid_perc25`
+           - 25th percentile of residual between NMF approx. and true data
+         - `resid_perc75`
+           - 75th percentile of residual between NMF approx. and true data
+         ```
+         {
+             "entity": [
+                 "abc",
+                 "defg",
+                 .
+                 .
+                 .
+             ],
+             "entity_count": [
+                 2,
+                 2,
+                 2,
+                 .
+                 .
+                 .
+             ],
+             "resid_min": 0.1,
+             "resid_max": 0.2,
+             "resid_perc25": 0.12
+             "resid_perc75": 0.18
+         }
+         ```
     """
     # print(data_filepath.file)
     # df_new = pd.read_csv(Path("data") / Path(data_filepath.filename))
@@ -157,5 +360,6 @@ async def predict_from_file(
         n_topics_wanted,
         df_named_topics,
         df_residuals_new,
+        n_days,
     )
     return response_dict

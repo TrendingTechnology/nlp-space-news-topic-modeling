@@ -5,7 +5,10 @@ pytest-md
 pytest-parallel
 pytest-repeat
 python-multipart
+pytest-asyncio
 fastapi
+aiohttp
+httpx
 uvicorn[standard]
 gunicorn
 aiofiles
@@ -19,3 +22,5 @@ scikit-learn
 azure-storage-blob
 jinja2
 ruamel.yaml
+Pillow
+Markdown

@@ -36,30 +36,33 @@ DATA_DIR = os.path.join(os.path.dirname(__file__))
 data_filepath = os.path.join(PROJ_ROOT_DIR, "data", "dashboard_data.h5")
 jinja2_templates_dir = os.path.join(PROJ_ROOT_DIR, "templates")
 
+# comes from 8_*.ipynb section 8
+# see heading PREPARE EXPORT FILE FOR API 2/4, APP 2/6
 TOPICS_BY_RESIDUAL = [
-    "Scientific Research about Dark Matter",
-    "Search for E.T. life",
-    "SpaceX Rocket Testing Reports",
-    "Neil Armstrong",
     "Mars mission updates",
-    "Topic 0",
-    "Achievements of Hubble Space Telescope",
-    "ISS updates",
+    "Scientific Research about Dark Matter",
     "Black Holes",
-    "Anticipating or Reporting on Eclipses",
-    "Dinosaurs",
-    "Space Debris from Satellites",
-    "Events relating to Virgin Galactic",
-    "Report on Detection of Gravitational Waves",
-    "Sun's influence on life across the Solar System",
-    "Topic 33",
     "Reports about Problem of Global Warming",
-    "Neuroscience Research",
+    "Sun's influence on life across the Solar System",
+    "Space Debris from Satellites",
+    "Search for E.T. life",
+    "Report on Detection of Gravitational Waves",
+    "SpaceX Rocket Testing Reports",
     "Spacecraft Imaging of Dwarf distant planet Pluto",
-    "On the Search for and Detection of Neutrinos",
-    "Evidence of Water in the Solar System",
+    "Achievements of Hubble Space Telescope",
     "About Exploring the Moon",
+    "On the Search for and Detection of Neutrinos",
+    "Events relating to Virgin Galactic",
+    "Topic 0",
+    "ISS updates",
+    "Evidence of Water in the Solar System",
+    "Dinosaurs",
+    "Neuroscience Research",
+    "Neil Armstrong",
+    "Topic 33",
+    "Anticipating or Reporting on Eclipses",
 ]
+# comes from 8_*.ipynb end of section 8.3
 TOPIC_O_TERMS = [
     "peopl",
     "thing",
@@ -72,22 +75,26 @@ TOPIC_O_TERMS = [
     "make",
     "look",
 ]
+# comes from 8_*.ipynb end of section 8.2
 TOPIC_0_NER = [
-    "VR",
-    "Overview",
-    "Nasa",
-    "Pratscher",
-    "Apollo",
-    "The Orbital Perspective",
-    "the University of Missouri",
+    "312132",
+    "Cambridge University",
+    "Columbia University’s",
+    "Science",
+    "University of North Carolina Chapel Hill",
+    "it?China",
+    "that?There",
+    "the Large Hadron Collider",
+    "the Stephen Spender Trust",
 ]
-beginning_date = date(2019, 11, 2)
+# dates of unseen news articles that will be shown on dashboard
+beginning_date = date(2019, 11, 2)  # first date AFTER end of training data
 ending_date = date(2020, 2, 28)
 
 # set up widgets
 topic_term = bhm.Select(
     title="Topic Name",
-    value=TOPICS_BY_RESIDUAL[5],
+    value=TOPICS_BY_RESIDUAL[14],  # Topic 0
     options=TOPICS_BY_RESIDUAL,
 )
 daterange = bhm.DateRangeSlider(
@@ -107,9 +114,7 @@ source_topics = bhm.ColumnDataSource(data=dict(count=[], topic=[]))
 source_weights = bhm.ColumnDataSource(
     data=dict(term_weight=[], term=[], topic=[])
 )
-ner_data_dict = dict(
-    entity_count=[], entity=[], topic=[], start_date=[], end_date=[]
-)
+ner_data_dict = dict(entity_count=[], entity=[], topic=[])
 source_ner = bhm.ColumnDataSource(data=ner_data_dict)
 df_groups = adh.load_data(data_filepath)
 group = df_groups.groupby("topic")
@@ -188,8 +193,6 @@ entity_counts_bar_chart = abh.bokeh_horiz_bar_chart(
         data_list=[
             ["entity", "Name", 14],
             ["entity_count", "Occurrences", 14],
-            ["start_date", "First News Article", 14],
-            ["end_date", "Last News Article", 14],
         ],
         tool_title_fontsize=16,
         tool_title="topic",
@@ -208,13 +211,13 @@ spreads_chart = abh.bokeh_horiz_spreads_chart(
     "topic",
     "resid_perc25_min",
     "resid_perc75_max",
-    (0.79, 1.0),
+    (0.75, 1.0),
     TOPICS_BY_RESIDUAL,
     0.85,
     index_cmap,
     index_cmap,
     tools,
-    "Topic Residual Spreads",
+    "Residual Spreads by Topic",
     toolbar_location=None,
     tooltips=adh.generate_tooltip(
         data_list=[

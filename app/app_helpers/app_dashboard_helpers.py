@@ -91,12 +91,18 @@ def create_dashboard_sidebar_text():
         the learned topics for all of these unseen news articles.
 
         <h3>Notes</h3>
-        Of the 35 learned topics, news articles in topics 0 and 33 were not
-        manually read. These two topics were not assigned a name and so are
-        listed as <i>Topic 0</i> and <i>Topic 33</i> respectively. If the
-        vertical axis text is cut off on the plots, then click the menu icon
-        (three horizontal bars at the top left) twice. This dashboard must be
-        viewed in landscape mode.
+        <ul style='padding-left:1.2em;'>
+            <li>Of the 35 learned topics, news articles in topics 0 and 33
+        were not manually read.</li>
+            <li>These two topics were not assigned a name and so are
+        listed as <i>Topic 0</i> and <i>Topic 33</i> respectively.</li>
+            <li>If the vertical axis text is cut off on the plots, then click
+        the menu icon (three horizontal bars at the top left) twice.</li>
+            <li>This dashboard must be viewed in landscape mode.</li>
+            <li>Term Weights are taken from ML model training.</li>
+            <li>Topic-wise organization (frequency) and residual spreads come
+        from news article text not seen during ML model training.</li>
+        </ul>
         """
     return text
 
@@ -144,6 +150,7 @@ def perform_updates(
         start_date, end_date, topic_selected, data_filepath
     )
     t_dates = pd.to_datetime(df_topic_filtered["date"]).dt.strftime("%Y-%m-%d")
+    date_range_str = f"({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
     # print(t_dates)
     update_progress(
         start_date,
@@ -191,15 +198,13 @@ def perform_updates(
     df_terms = pd.DataFrame.from_dict(d_terms, orient="index").T
     source_weights.data = df_terms
     term_weights_bar_chart.y_range.factors = df_terms["term"].tolist()[::-1]
-    topic_date_str = (
-        f"{topic_selected} ({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
-    )
+    topic_date_str = f"{topic_selected} {date_range_str}"
     term_weights_bar_chart.title.text = topic_date_str
 
     df_ner = pd.DataFrame.from_dict(d_ner, orient="index").T
     source_ner.data = df_ner
     entity_counts_bar_chart.y_range.factors = df_ner["entity"].tolist()[::-1]
-    ner_date_str = f"Organizations ({t_dates.iloc[0]} - {t_dates.iloc[-1]})"
+    ner_date_str = f"Organizations {date_range_str}"
     entity_counts_bar_chart.title.text = ner_date_str
     entity_counts_bar_chart.xaxis.axis_label = topic_selected
     source.data = df_weekdays
