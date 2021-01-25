@@ -4,19 +4,22 @@
 
 import asyncio
 import os
+import re
 from datetime import date
 from typing import Any, List, Mapping
 
 import aiohttp
 import api_helpers.api_scraping_helpers as apih
 import api_helpers.api_topic_predictor as tp
+import api_helpers.api_utility_helpers as apiuh
 import numpy as np
 import pandas as pd
+import peewee as pw
 from api_helpers.api_loading_helpers import handle_upload_file
 from bs4 import BeautifulSoup
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from joblib import load
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, validator
 
 router = APIRouter()
 
@@ -32,6 +35,8 @@ topic_training_residuals_statistics_filepath = (
 urls_to_read = 1
 n_topics_wanted = 35
 n_top_words = 10
+min_training_chars = 135
+news_article_length_allowance_factor = 0.80
 test_url = (
     "https://www.theguardian.com/science/2019/dec/09/european-space-"
     "agency-to-launch-clearspace-1-space-debris-collector-in-2025"
@@ -55,11 +60,118 @@ df_residuals_new = pd.read_csv(
 n_days = (ending_date - beginning_date).days
 # print(n_days)
 
+PROJ_ROOT_DIR = os.getcwd()
+data_dir = os.path.join(PROJ_ROOT_DIR, "data")
+db_name = os.path.join(data_dir, "predictions.db")
+
+# DB = pw.SqliteDatabase(db_name)
+
+# class Prediction(pw.Model):
+#     url = pw.TextField()
+#     date = pw.DateTimeField()
+#     year = pw.TextField()
+#     week_of_month = pw.IntegerField()
+#     weekday = pw.TextField()
+#     month = pw.TextField()
+#     topic_num = pw.IntegerField()
+#     topic = pw.TextField()
+#     resid = pw.FloatField()
+#     valid_resid_distribution = pw.BooleanField()
+#     term = pw.TextField()
+#     term_weight = pw.TextField()
+#     entity = pw.TextField()
+#     entity_count = pw.TextField()
+#     valid_residual = pw.BooleanField()
+#     valid_term_weight = pw.BooleanField()
+#     valid_entity_count = pw.BooleanField()
+#     resid_min = pw.FloatField()
+#     resid_max = pw.FloatField()
+#     resid_perc25 = pw.FloatField()
+#     resid_perc75 = pw.FloatField()
+
+#     class Meta:
+#         database = DB
+
+
+# DB.create_tables([Prediction], safe=True)
+
 
 class Url(BaseModel):
     """Parse and validate news article url"""
 
-    url: str
+    url: HttpUrl
+
+    @validator("url")
+    def validate_url(cls, v):
+        errors = []
+        if "theguardian.com" not in v:
+            errors.append("URL not from theguardian.com")
+
+        year = ""
+        month = ""
+        day = 0
+        month_regex_pattern = [
+            "jan",
+            "feb",
+            "mar",
+            "apr",
+            "may",
+            "jun",
+            "jul",
+            "aug",
+            "sep",
+            "oct",
+            "nov",
+            "dec",
+        ]
+        mregex = r"/(\d{4})/(" + "|".join(month_regex_pattern) + r")/(\d{2})/"
+        try:
+            year, month, day = list(
+                re.findall(
+                    mregex,
+                    v,
+                )[0]
+            )
+        except IndexError as e:
+            print(
+                (
+                    f"{str(e)} - {v} missing date info. Setting placeholder ."
+                    "value(s)"
+                )
+            )
+            if not year:
+                year = "None"
+            if not month:
+                month = "None"
+            if not day:
+                day = -999
+        # print(year, month, day, type(year), type(month), type(day))
+
+        if int(day) not in list(range(1, 31 + 1)):
+            errors.append(
+                (
+                    f"Invalid value provided for day: {day}. Allowed values "
+                    "are: 1-31"
+                )
+            )
+        acceptable_years = ["2019", "2020"]
+        if year not in acceptable_years:
+            errors.append(
+                (
+                    f"Invalid value provided for year: {year}. "
+                    f"Allowed values are: ({', '.join(acceptable_years)})"
+                )
+            )
+        acceptable_months = ["nov", "dec", "jan", "feb"]
+        if month not in acceptable_months:
+            errors.append(
+                (
+                    f"Invalid value provided for month: {month}. "
+                    f"Allowed values are: ({', '.join(acceptable_months)})"
+                )
+            )
+        assert not errors, f"{','.join(errors)}"
+        return v
 
     class Config:
         schema_extra = {"example": {"url": test_url}}
@@ -71,7 +183,7 @@ zip_texts = dict()
 
 class RetrieveTextForUrl(BaseModel):
 
-    url = str
+    url = HttpUrl
 
     @classmethod
     async def retrieve_text(cls, url):
@@ -105,113 +217,24 @@ async def predict_from_url(
     Example Inputs
     --------------
     - multiple news article urls
-        ```
-        [
-            {"url": "https://www.google.com"},
-            {"url": "https://www.yahoo.com"}
-        ]
-        ```
+      ```
+      [
+          {"url": "https://www.google.com"},
+          {"url": "https://www.yahoo.com"}
+      ]
+      ```
 
     - single news article url
-        ```
-        [
-            {"url": "https://www.google.com"}
-        ]
-        ```
+      ```
+      [
+          {"url": "https://www.google.com"}
+      ]
+      ```
 
-    Returns
-    -------
-    news article topic, text and other predicted/metadata : Dict[str: str]
-    - predicted topic, metadata and related quantities
-      - for single news article url
-        - `url`
-          - news article url
-        - `date`
-          - news article publication date
-        - `year`
-          - year of publication
-        - `week_of_month`
-          - week of month in which article was published
-        - `weekday`
-          - day of week on which article was published
-        - `month`
-          - month of year in which article was published
-        - `text`
-          - retrieved text of news article
-        - `topic_num`
-          - arbitrarily assigned topic internal number
-        - `topic`
-          - predicted name of topic
-        - `term`
-          - top 10 NLP tokens for topic, found during training
-        - `term_weight`
-          - weighted TFIDF term weights, found during training
-        ```
-        {
-            "url": "https://www.google.com",
-            "date": "1900-01-01T00:00:00",
-            "year": "1900",
-            "week_of_month": 1,
-            "weekday": "Monday",
-            "month": "Jan",
-            "text": "<full article text>",
-            "topic_num": <internally assigned topic number from 1 to 35>,
-            "topic": "<topic name>",
-            "term": [
-                "abc",
-                "defg",
-                .
-                .
-                .
-            ],
-            "term_weight": [
-                0.100,
-                0.200,
-                .
-                .
-                .
-            ]
-        }
-        ```
-      - additional keys, if all acceptable news article urls
-        - `entity`
-          - up to 10 most frequently occurring organizations in article
-        - `entity_count`
-          - respective number of occurrences of organizations in article
-        - `resid_min`
-          - min. residual (Frobenius norm) between NMF approx. and true data
-        - `resid_max`
-          - max. residual between NMF approximation and true data
-        - `resid_perc25`
-          - 25th percentile of residual between NMF approx. and true data
-        - `resid_perc75`
-          - 75th percentile of residual between NMF approx. and true data
-        ```
-        {
-            "entity": [
-                "abc",
-                "defg",
-                .
-                .
-                .
-            ],
-            "entity_count": [
-                2,
-                2,
-                2,
-                .
-                .
-                .
-            ],
-            "resid_min": 0.1,
-            "resid_max": 0.2,
-            "resid_perc25": 0.12
-            "resid_perc75": 0.18
-        }
-        ```
-    """
+    """ + apiuh.generate_return_docstring()
     guardian_urls = [dict(url)["url"] for url in urls]
     # print(guardian_urls)
+
     tasks = [
         asyncio.create_task(RetrieveTextForUrl.retrieve_text(guardian_url))
         for guardian_url in guardian_urls
@@ -232,6 +255,8 @@ async def predict_from_url(
         n_topics_wanted,
         df_named_topics,
         df_residuals_new,
+        # Prediction,
+        # DB,
         n_days,
     )
     return response_dict
@@ -243,120 +268,59 @@ async def predict_from_file(
 ) -> Mapping[str, Any]:
     """Predict topic from a CSV file of news article url & text.
 
-     Parameters
-     ----------
-     file : Dict[str: float]
-     - csv file with following for each news article
-       - url
-       - full text
+    Parameters
+    ----------
+    file : Dict[str: float]
+    - csv file with following for each news article
+      - url
+      - full text
 
-     Example Inputs
-     --------------
-     ```
-     url,text
-     https://www.google.com,abcd
-     https://www.yahoo.com,efgh
-     ```
+    Example Inputs
+    --------------
+    - multiple news article texts
+      ```
+      url,text
+      https://www.google.com,abcd
+      https://www.yahoo.com,efgh
+      ```
+    - single news article url
+      ```
+      url,text
+      https://www.google.com,abcd
+      ```
 
-     ```
-     url,text
-     https://www.google.com,abcd
-     ```
-
-    Returns
-     -------
-     news article topic, text and other predicted/metadata : Dict[str: str]
-     - predicted topic, metadata and related quantities
-       - for single news article text
-         - `url`
-           - news article url
-         - `date`
-           - news article publication date
-         - `year`
-           - year of publication
-         - `week_of_month`
-           - week of month in which article was published
-         - `weekday`
-           - day of week on which article was published
-         - `month`
-           - month of year in which article was published
-         - `text`
-           - retrieved text of news article
-         - `topic_num`
-           - arbitrarily assigned topic internal number
-         - `topic`
-           - predicted name of topic
-         - `term`
-           - top 10 NLP tokens for topic, found during training
-         - `term_weight`
-           - weighted TFIDF term weights, found during training
-         ```
-         {
-             "url": "https://www.google.com",
-             "date": "1900-01-01T00:00:00",
-             "year": "1900",
-             "week_of_month": 1,
-             "weekday": "Monday",
-             "month": "Jan",
-             "text": "<full article text>",
-             "topic_num": <internally assigned topic number from 1 to 35>,
-             "topic": "<topic name>",
-             "term": [
-                 "abc",
-                 "defg",
-                 .
-                 .
-                 .
-             ],
-             "term_weight": [
-                 0.100,
-                 0.200,
-                 .
-                 .
-                 .
-             ]
-         }
-         ```
-       - additional keys, if for all acceptable news article texts
-         - `entity`
-           - up to 10 most frequently occurring organizations in article
-         - `entity_count`
-           - respective number of occurrences of organizations in article
-         - `resid_min`
-           - min. residual (Frobenius norm) between NMF approx. and true data
-         - `resid_max`
-           - max. residual between NMF approximation and true data
-         - `resid_perc25`
-           - 25th percentile of residual between NMF approx. and true data
-         - `resid_perc75`
-           - 75th percentile of residual between NMF approx. and true data
-         ```
-         {
-             "entity": [
-                 "abc",
-                 "defg",
-                 .
-                 .
-                 .
-             ],
-             "entity_count": [
-                 2,
-                 2,
-                 2,
-                 .
-                 .
-                 .
-             ],
-             "resid_min": 0.1,
-             "resid_max": 0.2,
-             "resid_perc25": 0.12
-             "resid_perc75": 0.18
-         }
-         ```
-    """
+    """ + apiuh.generate_return_docstring()
     # print(data_filepath.file)
     # df_new = pd.read_csv(Path("data") / Path(data_filepath.filename))
     df_new = handle_upload_file(data_filepath, pd.read_csv)
+
+    # Sanity checks
+    error = ""
+    if "text" not in list(df_new):
+        fname = os.path.basename(data_filepath.filename)
+        error = f"File {fname} missing required column 'text'"
+        if error:
+            error_msg = {"detail": [{"loc": ["body"], "msg": error}]}
+            return error_msg
+    df_new["text"] = df_new["text"].fillna("")
+
+    # Find texts that are not long enough - placeholder content will be added
+    min_reqd_length = int(
+        min_training_chars * news_article_length_allowance_factor
+    )
+    too_short_mask = df_new["text"].str.len() <= min_reqd_length
+    mask = df_new["text"].str.len() > min_reqd_length
+    df_new_too_short = df_new.loc[too_short_mask].reset_index(drop=True)
+    df_new = df_new.loc[mask].reset_index(drop=True)
+    if df_new.empty:
+        error = (
+            "All News article texts are not long enough. "
+            f"Need more than {min_reqd_length} characters."
+        )
+        if error:
+            error_msg = {"detail": [{"loc": ["body"], "msg": error}]}
+            return error_msg
+
     response_dict = tp.generate_response(
         df_new,
         pipe,
@@ -364,6 +328,9 @@ async def predict_from_file(
         n_topics_wanted,
         df_named_topics,
         df_residuals_new,
+        # Prediction,
+        # DB,
         n_days,
+        df_new_too_short,
     )
     return response_dict

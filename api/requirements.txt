@@ -13,12 +13,13 @@ uvicorn[standard]
 gunicorn
 aiofiles
 mangum
+peewee
 bs4
 lxml
 nltk
 requests
 pandas
-scikit-learn
+scikit-learn==0.24.0
 azure-storage-blob
 jinja2
 ruamel.yaml

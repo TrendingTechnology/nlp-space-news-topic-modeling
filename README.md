@@ -106,6 +106,13 @@ Analysis will be performed using an un-supervised learning model. Details are in
    make api-test
    ```
 
+## [Notes](#notes)
+1. API
+   - [happypath testing](https://en.wikipedia.org/wiki/Happy_path) has been implemented
+   - Unhappy path tests (of breaking API requests) should be implemented
+2. APP
+   - no tests are implemented
+
 ## [Project Organization](#project-organization)
 
     ├── .pre-commit-config.yaml       <- configuration file for pre-commit hooks

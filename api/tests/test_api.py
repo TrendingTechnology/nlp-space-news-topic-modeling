@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import json
 import os
 from datetime import date
 
@@ -18,6 +19,11 @@ beginning_date = date(2019, 11, 2)  # date of first unseen news article
 ending_date = date(2020, 2, 27)  # date of last unseen news article
 n_days = (ending_date - beginning_date).days
 
+PROJ_ROOT_DIR = os.getcwd()
+api_image_specs_filepath = os.path.join(
+    PROJ_ROOT_DIR, "api_helpers", "api_unseen_article_urls.yml"
+)
+
 
 def test_root():
     response = client.get("/")
@@ -32,18 +38,9 @@ def test_root():
 @pytest.mark.scrapingtest
 async def test_async_predictor_multi_input_predict_from_url():
     async with AsyncClient(app=app, base_url="http://testserver") as ac:
-        test_urls = [
-            (
-                "https://www.theguardian.com/science/2019/dec/09/european-"
-                "space-agency-to-launch-clearspace-1-space-debris-collector-"
-                "in-2025"
-            ),
-            (
-                "https://www.theguardian.com/science/2019/dec/19/true-"
-                "meanings-of-words-of-emotion-get-lost-in-translation-"
-                "study-finds"
-            ),
-        ]
+        with open(api_image_specs_filepath, "r") as f:
+            test_urls = [x.lstrip("- ").rstrip("\n") for x in f if "-" in x]
+        test_urls = [test_urls[13], test_urls[17]]
         json_input = [{"url": test_url} for test_url in test_urls]
         response = await ac.post(
             "/api/v1/topics/predict",

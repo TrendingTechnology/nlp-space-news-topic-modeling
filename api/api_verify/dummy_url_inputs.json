@@ -1,0 +1,27 @@
+[
+    {
+        "url": "sadfsf",
+        "status_code": 422,
+        "msg": "[url=invalid or missing URL scheme]"
+    },
+    {
+        "abc": "https://www.theguardian.com/science/2019/dec/09/european-space-agency-to-launch-clearspace-1-space-debris-collector-in-2025",
+        "status_code": 422,
+        "msg": "[url=field required]"
+    },
+    {
+        "url": "https://www.theguardian.com/science/2021/jan/22/spacewatch-bezos-blue-origin-really-close-flying-humans",
+        "status_code": 422,
+        "msg": "[url=Invalid value provided for year: 2021. Allowed values are: (2019, 2020)]"
+    },
+    {
+        "url": "https://www.google.com",
+        "status_code": 422,
+        "msg": "[url=URL not from theguardian.com,Invalid value provided for day: -999. Allowed values are: 1-31,Invalid value provided for year: None. Allowed values are: (2019, 2020),Invalid value provided for month: None. Allowed values are: (nov, dec, jan, feb)]"
+    },
+    {
+        "url": "https://www.theguardian.com/science/2021/jun/22/this-is-some-None-text",
+        "status_code": 422,
+        "msg": "[url=Invalid value provided for year: 2021. Allowed values are: (2019, 2020),Invalid value provided for month: jun. Allowed values are: (nov, dec, jan, feb)]"
+    }
+]

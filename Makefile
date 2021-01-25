@@ -52,6 +52,11 @@ api:
 	tox -e api
 .PHONY: api
 
+## Run API verification with tox
+api-verify:
+	tox -e apiverify
+.PHONY: api-verify
+
 ## Build API in container
 container-api-build:
 	@docker build -t $(TAG) \

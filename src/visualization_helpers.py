@@ -39,6 +39,17 @@ def combine_string_and_nan_columns(df):
     return s
 
 
+def plot_histogram(
+    s, ptitle, vline_series, bar_color="#4287f5", fig_size=(12, 6)
+):
+    _, ax = plt.subplots(figsize=fig_size)
+    s.plot(kind="hist", ax=ax, color=bar_color)
+    ax.axvline(vline_series, color="red")
+    ax.set_xlabel(None)
+    ax.set_ylabel(None)
+    ax.set_title(ptitle, fontsize=16, fontweight="bold", loc="left")
+
+
 def plot_horiz_bar(
     df,
     ptitle,
