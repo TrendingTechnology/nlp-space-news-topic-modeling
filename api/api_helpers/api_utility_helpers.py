@@ -117,92 +117,158 @@ def get_description_html(
 
 def generate_return_docstring():
     return_docstring = """
-        Returns
-        -------
-        topic, text and other predicted/metadata per article : Dict[str: str]
-        - `url`
-          - news article url
-        - `date`
-          - news article publication date
-        - `year`
-          - year of publication
-        - `week_of_month`
-          - week of month in which article was published
-        - `weekday`
-          - day of week on which article was published
-        - `month`
-          - month of year in which article was published
-        - `text`
-          - retrieved text of news article
-        - `topic_num`
-          - arbitrarily assigned topic internal number
-        - `topic`
-          - predicted name of topic
-        - `term` *
-          - list of top 10 NLP tokens, found during training
-        - `term_weight` *
-          - list of TFIDF term weights, found during training
-        - `entity` *, **
-          - list of up to 10 most frequently occurring organizations detected
-        - `entity_count`*
-          - list of respective number of occurrences of organizations detected
-        - `resid_min` *, **
-          - list of min. residual (Frobenius norm) b/w NMF approx./true data
-        - `resid_max` *, **
-          - list of max. residual between NMF approximation and true data
-        - `resid_perc25` *, **
-          - list of 25th percentile of residual b/w NMF approx. and true data
-        - `resid_perc75` *, **
-          - list of 75th percentile of residual b/w NMF approx. and true data
-          ```
-          {
-              "url": "https://www.google.com",
-              "date": "1900-01-01T00:00:00",
-              "year": "1900",
-              "week_of_month": 1,
-              "weekday": "Monday",
-              "month": "Jan",
-              "text": "<full article text>",
-              "topic_num": <internally assigned topic number from 1 to 35>,
-              "topic": "<topic name>",
-              "term": [
-                  "abc",
-                  "defg",
-                  .
-                  .
-                  .
-              ],
-              "term_weight": [
-                  0.100,
-                  0.200,
-                  .
-                  .
-                  .
-              ],
-              "entity": [
-                  "abcd",
-                  "efg",
-                  "hijkl"
-                  .
-                  .
-                  .
-              ],
-              "entity_count": [
-                  2,
-                  2,
-                  1,
-                  .
-                  .
-                  .
-              ],
-              "resid_min": 0.1,
-              "resid_max": 0.2,
-              "resid_perc25": 0.12
-              "resid_perc75": 0.18
-          }
-          ```
+    Returns
+    -------
+    topic, text and other predicted/metadata per article : Dict[str: str]
+    - `url`
+      - news article url
+    - `date`
+      - news article publication date
+    - `year`
+      - year of publication
+    - `week_of_month`
+      - week of month in which article was published
+    - `weekday`
+      - day of week on which article was published
+    - `month`
+      - month of year in which article was published
+    - `text`
+      - retrieved text of news article
+    - `topic_num`
+      - arbitrarily assigned topic internal number
+    - `topic`
+      - predicted name of topic
+    - `term` *
+      - list of top 10 NLP tokens, found during training
+    - `term_weight` *
+      - list of TFIDF term weights, found during training
+    - `entity` *, **
+      - list of up to 10 most frequently occurring organizations detected
+    - `entity_count`*
+      - list of respective number of occurrences of organizations detected
+    - `resid_min` *, **
+      - list of min. residual (Frobenius norm) b/w NMF approx./true data
+    - `resid_max` *, **
+      - list of max. residual between NMF approximation and true data
+    - `resid_perc25` *, **
+      - list of 25th percentile of residual b/w NMF approx. and true data
+    - `resid_perc75` *, **
+      - list of 75th percentile of residual b/w NMF approx. and true data
 
-          * list applies to each topic
-          ** empty list if all acceptable unseen article urls are not used
-        """
+    Example
+    -------
+    ```
+    {
+        "url": "https://www.google.com",
+        "date": "1900-01-01T00:00:00",
+        "year": "1900",
+        "week_of_month": 1,
+        "weekday": "Monday",
+        "month": "Jan",
+        "text": "<full article text>",
+        "topic_num": <internally assigned topic number from 1 to 35>,
+        "topic": "<topic name>",
+        "term": [
+            "abc",
+            "defg",
+            .
+            .
+            .
+        ],
+        "term_weight": [
+            0.100,
+            0.200,
+            .
+            .
+            .
+        ],
+        "entity": [
+            "abcd",
+            "efg",
+            "hijkl"
+            .
+            .
+            .
+        ],
+        "entity_count": [
+            2,
+            2,
+            1,
+            .
+            .
+            .
+        ],
+        "resid_min": 0.1,
+        "resid_max": 0.2,
+        "resid_perc25": 0.12
+        "resid_perc75": 0.18
+    }
+    ```
+
+    Notes
+    -----
+    ```
+    1. * list applies to each topic
+    2. ** empty list if all acceptable unseen article urls are not used
+    ```
+    """
     return return_docstring
+
+
+def get_url_doc():
+    ds = """
+    Predict topic from url(s).
+
+    Parameters
+    ----------
+    urls : Dict[str: str]
+      - news article url(s) to be retrieved
+
+    Example Inputs
+    --------------
+    - multiple news article urls
+      ```
+      [
+          {"url": "https://www.google.com"},
+          {"url": "https://www.yahoo.com"}
+      ]
+      ```
+
+    - single news article url
+      ```
+      [
+          {"url": "https://www.google.com"}
+      ]
+      ```
+
+    """
+    return ds + generate_return_docstring()
+
+
+def get_csv_doc():
+    ds = """
+    Predict topic from a CSV file of news article url & text.
+
+    Parameters
+    ----------
+    file : Dict[str: float]
+    - csv file with following for each news article
+      - url
+      - full text
+
+    Example Inputs
+    --------------
+    - multiple news article texts
+      ```
+      url,text
+      https://www.google.com,abcd
+      https://www.yahoo.com,efgh
+      ```
+    - single news article url
+      ```
+      url,text
+      https://www.google.com,abcd
+      ```
+
+    """
+    return ds + generate_return_docstring()

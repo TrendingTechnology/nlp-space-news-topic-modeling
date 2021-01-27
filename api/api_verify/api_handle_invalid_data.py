@@ -47,11 +47,33 @@ def update_logging(k, r, single_obs=True):
 
 
 if __name__ == "__main__":
+    # Sensible CSV file texts, that don't break /uploadcv POST endpoint
+    # - retrieving data
+    PROJ_PAR_DIR = os.path.abspath(os.path.join(".", os.pardir))
+    data_dir = os.path.join(PROJ_PAR_DIR, "data")
+
+    # Load data
+    real_filepath = os.path.join(data_dir, "guardian_3.csv")
+    if not os.path.exists(real_filepath):
+        df = adl.load_az_blob_data(
+            az_storage_container_name="myconedesx7",
+            az_blob_name="blobedesz42",
+            n_rows=None,
+            index_col=None,
+        )
+        df.to_csv(real_filepath, index=False)
+
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
+    # ENV_PORT = os.getenv("API_PORT", 8000)
+    ENV_PORT = int(os.environ.get("API_PORT", 8000))
+    HOST_URL = "0.0.0.0"
+    # print(ENV_PORT)
+    HOST_PORT = f"http://{HOST_URL}:{ENV_PORT}"
+
     # # Nonsense values to verify response of the /predict POST endpoint
-    url = urljoin("http://0.0.0.0:8000/api/v1/topics/", "predict").lower()
+    url = urljoin(f"{HOST_PORT}/api/v1/topics/", "predict").lower()
     headers = {"Content-Type": "application/json"}
 
     PROJ_ROOT_DIR = os.path.abspath(os.getcwd())
@@ -82,11 +104,8 @@ if __name__ == "__main__":
             assert error_msg_str == error_msg
 
     # # Nonsense CSV file texts, that break /uploadcv POST endpoint response
-    url = urljoin("http://0.0.0.0:8000/api/v1/topics/", "uploadcsv").lower()
+    url = urljoin(f"{HOST_PORT}/api/v1/topics/", "uploadcsv").lower()
     headers = {"accept": "application/json"}
-
-    PROJ_PAR_DIR = os.path.abspath(os.path.join(".", os.pardir))
-    data_dir = os.path.join(PROJ_PAR_DIR, "data")
 
     # Generate dummy data
     d_observation_csvs = adl.generate_dummy_invalid_csv_data()
@@ -107,17 +126,7 @@ if __name__ == "__main__":
             logger = logging.getLogger(__name__)
             logger.error(v["error_msg"])
 
-    # # Sensible CSV file texts, that don't break /uploadcv POST endpoint
-    # Load data
-    real_filepath = os.path.join(data_dir, "guardian_3.csv")
-    if not os.path.exists(real_filepath):
-        df = adl.load_az_blob_data(
-            az_storage_container_name="myconedesx7",
-            az_blob_name="blobedesz42",
-            n_rows=None,
-            index_col=None,
-        )
-        df.to_csv(real_filepath, index=False)
+    # Sensible CSV file texts, that don't break /uploadcv POST endpoint
     # Verification
     file_dict = {
         "data_filepath": (

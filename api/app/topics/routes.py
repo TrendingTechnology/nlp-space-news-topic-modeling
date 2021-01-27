@@ -135,8 +135,8 @@ class Url(BaseModel):
         except IndexError as e:
             print(
                 (
-                    f"{str(e)} - {v} missing date info. Setting placeholder ."
-                    "value(s)"
+                    f"Error validating Pydantic HttpUrl - msg={str(e)} - {v} "
+                    f"missing date info. Setting placeholder value(s)."
                 )
             )
             if not year:
@@ -207,31 +207,6 @@ class RetrieveTextForUrl(BaseModel):
 async def predict_from_url(
     urls: Urls,
 ) -> Mapping[str, Any]:
-    """Predict topic from url(s).
-
-    Parameters
-    ----------
-    urls : Dict[str: str]
-      - news article url(s) to be retrieved
-
-    Example Inputs
-    --------------
-    - multiple news article urls
-      ```
-      [
-          {"url": "https://www.google.com"},
-          {"url": "https://www.yahoo.com"}
-      ]
-      ```
-
-    - single news article url
-      ```
-      [
-          {"url": "https://www.google.com"}
-      ]
-      ```
-
-    """ + apiuh.generate_return_docstring()
     guardian_urls = [dict(url)["url"] for url in urls]
     # print(guardian_urls)
 
@@ -266,30 +241,6 @@ async def predict_from_url(
 async def predict_from_file(
     data_filepath: UploadFile = File(...),
 ) -> Mapping[str, Any]:
-    """Predict topic from a CSV file of news article url & text.
-
-    Parameters
-    ----------
-    file : Dict[str: float]
-    - csv file with following for each news article
-      - url
-      - full text
-
-    Example Inputs
-    --------------
-    - multiple news article texts
-      ```
-      url,text
-      https://www.google.com,abcd
-      https://www.yahoo.com,efgh
-      ```
-    - single news article url
-      ```
-      url,text
-      https://www.google.com,abcd
-      ```
-
-    """ + apiuh.generate_return_docstring()
     # print(data_filepath.file)
     # df_new = pd.read_csv(Path("data") / Path(data_filepath.filename))
     df_new = handle_upload_file(data_filepath, pd.read_csv)
@@ -334,3 +285,7 @@ async def predict_from_file(
         df_new_too_short,
     )
     return response_dict
+
+
+predict_from_url.__doc__ = apiuh.get_url_doc()
+predict_from_file.__doc__ = apiuh.get_csv_doc()
