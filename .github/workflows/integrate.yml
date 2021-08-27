@@ -19,20 +19,20 @@ jobs:
         run: python -m pip install --upgrade pip
       - run: pip install tox
       - run: make lint
-      - run: make api-test
-      - name: Run API in container
-        run: |
-          make container-api-build
-          make container-api-run
-          make container-api-stop
-          make container-api-delete
-      - name: Run APP in container
-        run: |
-          make container-app-build
-          make container-app-run
-          make container-app-stop
-          make container-app-delete
-      - run: make ci
-        env:
-          GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
-          NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
+      # - run: make api-test
+      # - name: Run API in container
+      #   run: |
+      #     make container-api-build
+      #     make container-api-run
+      #     make container-api-stop
+      #     make container-api-delete
+      # - name: Run APP in container
+      #   run: |
+      #     make container-app-build
+      #     make container-app-run
+      #     make container-app-stop
+      #     make container-app-delete
+      # - run: make ci
+      #   env:
+      #     GUARDIAN_API_KEY: ${{ secrets.GUARDIAN_API_KEY }}
+      #     NYTIMES_API_KEY: ${{ secrets.NYTIMES_API_KEY }}
