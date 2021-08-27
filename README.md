@@ -78,12 +78,11 @@ Analysis will be performed using an un-supervised learning model. Details are in
      - merge multiple files of articles text data retrieved from news publications API or archive
      - filter out articles of less than 500 words
      - export to `*.csv` file for use in unsupervised machine learning models
-   - `8_gensim_coherence_nlp_trials_v2.ipynb` ([view](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-topic-modeling/blob/master/8_gensim_coherence_nlp_trials_v2.ipynb)) (does not cover data from the Hubble news feed, New York Times and Space.com)
+   - `9_gensim_coherence_nlp_trials_v3.ipynb` ([view](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-topic-modeling/blob/master/9_gensim_coherence_nlp_trials_v3.ipynb)) (does not cover data from the Hubble news feed, New York Times and Space.com)
      - experiments in selecting number of topics using
        - coherence score from built-in coherence model to score Gensim's NMF
        - `sklearn`'s implementation of TFIDF + NMF, using best number of topics found using Gensim's NMF
      - manually reading articles that NMF associates with each topic
-     - qualitative assessment of cosine similarities for inter-topic news articles
 
 ## [Project Organization](#project-organization)
 
