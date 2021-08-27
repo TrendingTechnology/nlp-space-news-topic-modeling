@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/ambv/black
-    rev: 20.8b1
+    rev: 21.7b0
     hooks:
     - id: black
       name: Ensure black code formatting
@@ -12,7 +12,7 @@ repos:
               __init__.py
           )
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.4
+    rev: 3.9.2
     hooks:
     - id: flake8
       name: Ensure flake8 compliance
@@ -26,7 +26,7 @@ repos:
               \.(ipynb)$
           )
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.7.0
+    rev: 5.9.3
     hooks:
     - id: isort
       name: Ensure python modules are sorted
@@ -35,7 +35,7 @@ repos:
       verbose: true
       files: \.(py)$
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.0.1
     hooks:
     - id: end-of-file-fixer
       name: Ensure files end in a newline
@@ -50,7 +50,7 @@ repos:
               \.(ipynb)$
           )
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.0.1
     hooks:
     - id: trailing-whitespace
       name: Ensure trailing whitespace is removed

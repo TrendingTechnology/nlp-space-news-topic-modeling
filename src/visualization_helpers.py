@@ -8,7 +8,6 @@ from typing import List
 import altair as alt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from matplotlib import colors as mcolors
 from matplotlib import pyplot as plt
 
@@ -22,8 +21,6 @@ plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels\n",
 plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels\n",
 plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize\n",
 plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title\n",
-sns.set_style("darkgrid", {"legend.frameon": False}),
-sns.set_context("talk", font_scale=0.95, rc={"lines.linewidth": 2.5})
 alt.renderers.set_embed_options(
     padding={"left": 0, "right": 0, "bottom": 0, "top": 0}
 )
@@ -398,6 +395,7 @@ def altair_datetime_heatmap(
     sort_x=[],
     dx=5,
     offset=10,
+    xLabelLimit=450,
     plot_titleFontSize=16,
 ):
     """Generate a datetime heatmap with Altair"""
@@ -460,7 +458,7 @@ def altair_datetime_heatmap(
             dx=dx,
             offset=offset,
         )
-        .configure_axisY(labelLimit=450, labelAlign="right")
+        .configure_axisY(labelLimit=xLabelLimit, labelAlign="right")
     )
     if not os.path.exists(file_path) and save_to_html:
         heatmap.save(file_path)
