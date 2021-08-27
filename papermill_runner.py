@@ -17,79 +17,15 @@ PROJ_ROOT_DIR = os.path.abspath(os.getcwd())
 raw_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "raw")
 processed_data_dir = os.path.join(PROJ_ROOT_DIR, "data", "processed")
 output_notebook_dir = os.path.join(PROJ_ROOT_DIR, "executed_notebooks")
-one_dict_nb_name = "1_get_list_of_urls.ipynb"
-two_dict_nb_name = "2_scrape_urls.ipynb"
 three_dict_nb_name = "3_merge_scraped_and_filter.ipynb"
 eight_dict_nb_name = "8_gensim_coherence_nlp_trials_v2.ipynb"
-publication_name_for_nbs_six_seven = "guardian"
-publications = ["space", "guardian", "hubble", "nytimes"]
 cloud_run = True
-raw_data_filepaths = {}
-for fname in publications:
-    full_filename = f"{fname}_com" if fname == "space" else fname
-    raw_data_filepaths[fname] = os.path.join(
-        PROJ_ROOT_DIR, "data", "raw", f"{full_filename}_urls.csv"
-    )
-
-one_dict = {
-    "data_dir": raw_data_dir,
-    "urls": {
-        "guardian": "https://content.guardianapis.com/search",
-        "hubble": "http://hubblesite.org/api/v3/news?page=all",
-        "space": "https://www.space.com/archive",
-    },
-    "guardian_from_date": "1950-01-01",
-    "guardian_to_date": "2019-11-01",
-    "guardian_section": "science",
-    "guardian_query": "space",
-    "guardian_start_page_num": 1,
-    "guardian_num_pages_wanted": 49,
-    "guardian_api": "<api-key-here>",
-    "guardian_query_min_delay": 2,
-    "guardian_query_max_delay": 4,
-    "hubble_article_fields_available": ["name", "news_id", "url"],
-    "space_com_years": list(range(1999, 2019 + 1)),
-    "nytimes_api": "<api-key-here>",
-    "nytimes_query": "space",
-    "nytimes_begin_date": "19500101",
-    "nytimes_end_date": "20191101",
-    "nytimes_start_page_num": 0,
-    "nytimes_num_pages_wanted": -1,
-    "nytimes_newspaper_lang": "en",
-    "list_of_urls_file": raw_data_filepaths,
-}
-
-raw_data_filepaths.update(
-    {
-        "nytimes": os.path.join(
-            PROJ_ROOT_DIR, "data", "raw", "nytimes_urls__*.csv"
-        )
-    }
-)
-two_dict = {
-    "data_dir": raw_data_dir,
-    "min_delay_between_scraped": 0,
-    "max_delay_between_scraped": 1,
-    "list_of_urls_file": raw_data_filepaths,
-}
-if not cloud_run:
-    urls = {
-        k: pd.read_csv(two_dict["list_of_urls_file"][k]["url"].tolist())
-        for k in ["guardian", "hubble", "space"]
-    }
-    urls = {}
-    urls["nytimes"] = pd.concat(
-        [pd.read_csv(f) for f in glob(raw_data_filepaths["nytimes"])],
-        axis=0,
-        ignore_index=True,
-    )["web_url"].tolist()
-    two_dict["urls"] = urls
 
 three_dict = {
     "data_dir": raw_data_dir,
     "processed_data_dir": processed_data_dir,
     "az_storage_container_name": "myconedesx7",
-    "cloud_data": True,
+    "cloud_data": cloud_run,
     "hubble_inputs": {"blobedesz23": "urls", "blobedesz22": "text"},
     "hubble_processed_filename": "hubble_processed.csv",
     "nytimes_inputs": {
