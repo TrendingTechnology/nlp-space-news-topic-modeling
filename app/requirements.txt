@@ -1,5 +1,5 @@
-pandas
-panel
-azure-storage-blob
-tables
-jinja2
+pandas==1.3.2
+panel==0.12.1
+azure-storage-blob==12.8.1
+tables==3.6.1
+jinja2==3.0.1

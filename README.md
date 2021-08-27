@@ -4,7 +4,17 @@
 
 <div style="text-align:center"><span>Photos by nasa.gov (<a href="https://www.nasa.gov/sites/default/files/thumbnails/image/nh-pluto-charon-v2-10-1-15.jpg">1</a>, <a href="https://www.nasa.gov/sites/default/files/thumbnails/image/pia02406.jpg">2</a>, <a href="https://www.nasa.gov/sites/default/files/thumbnails/image/iss056e201248.jpg">3</a>, <a href="https://www.nasa.gov/sites/default/files/thumbnails/image/tess_tde_still_print_0.jpg">4</a>, <a href="https://science.nasa.gov/science-red/s3fs-public/mnt/medialibrary/2008/10/10/10oct_lhc_resources/tunnel_med.jpg">5</a>) and <a href="https://www.extremetech.com/extreme/197673-nasa-and-the-esa-confirm-that-the-lost-beagle-2-orbiter-has-been-found-on-mars">extremetech.com</a></div>
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/nlp-space-news-topic-modeling/master?urlpath=lab) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nlp-space-news-topic-modeling/master/4_nlp_trials.ipynb) [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-topic-modeling/tree/master/) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/) ![CI](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CI/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/edesz/nlp-space-news-topic-modeling/master?urlpath=lab)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nlp-space-news-topic-modeling/master/4_nlp_trials.ipynb)
+[![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/edesz/nlp-space-news-topic-modeling/tree/master/)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
+![CI](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CI/badge.svg)
+![CodeQL](https://github.com/edesz/nlp-space-news-topic-modeling/workflows/CodeQL/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/mit)
+![OpenSource](https://badgen.net/badge/Open%20Source%20%3F/Yes%21/blue?icon=github)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+![prs-welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+![pyup](https://pyup.io/repos/github/edesz/nlp-space-news-topic-modeling/shield.svg)
 
 ## [Table of Contents](#table-of-contents)
 1. [Project Idea](#project-idea)
@@ -74,10 +84,6 @@ Analysis will be performed using an un-supervised learning model. Details are in
        - `sklearn`'s implementation of TFIDF + NMF, using best number of topics found using Gensim's NMF
      - manually reading articles that NMF associates with each topic
      - qualitative assessment of cosine similarities for inter-topic news articles
-4. Run CI build with
-   ```bash
-   make ci
-   ```
 
 ## [Project Organization](#project-organization)
 
